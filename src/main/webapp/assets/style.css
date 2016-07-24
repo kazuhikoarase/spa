@@ -1,0 +1,27 @@
+
+BODY {
+  margin: 0px;
+  padding: 0px;
+  overflow: hidden;
+}
+
+* {
+  font-family: 'Meiryo UI', sans-serif;
+  font-size: 10pt;
+}
+
+.dialog-frame {
+  padding: 0px;
+  border-style: none;
+  background-color: #ffffff;
+  -webkit-box-shadow: 0px 0px 4px 0px rgba(0, 0, 0, 0.75);
+     -moz-box-shadow: 0px 0px 4px 0px rgba(0, 0, 0, 0.75);
+          box-shadow: 0px 0px 4px 0px rgba(0, 0, 0, 0.75);
+}
+
+.dialog-title {
+  background-color: #eeeeee;
+  font-weight: bold;
+  padding: 4px;
+  margin-bottom: 4px;
+}
