@@ -10,7 +10,7 @@ namespace spa.ui {
 
   var dialogs : JQuery[] = [];
 
-  export var showDialog = function(ctx : DialogContext) {
+  export var showDialog = (ctx : DialogContext) => {
 
     var $btn = createSVG(12, 12).css('float', 'right').
       append(createSVGElement('rect').attr({
@@ -23,7 +23,7 @@ namespace spa.ui {
       on('mousedown', (event) => {
         event.preventDefault();
         event.stopPropagation();
-      }).on('mouseup', function(event) {
+      }).on('mouseup', (event) => {
         var newDialogs : JQuery[] = [];
         for (var i = 0; i < dialogs.length; i += 1) {
           if (dialogs[i] != $dlg) {
@@ -37,7 +37,7 @@ namespace spa.ui {
       $btn.css('display', 'none');
     }
 
-    var toFront = function() {
+    var toFront = () => {
       var newDialogs : JQuery[] = [];
       for (var i = 0; i < dialogs.length; i += 1) {
         if (dialogs[i] != $dlg) {
@@ -52,7 +52,7 @@ namespace spa.ui {
     };
 
     var dragPoint : { x : number, y : number } = null;
-    var mouseDownHandler = function(event : JQueryEventObject) {
+    var mouseDownHandler = (event : JQueryEventObject) => {
       event.preventDefault();
       toFront();
       var off = $dlg.offset();
@@ -60,11 +60,11 @@ namespace spa.ui {
       $(document).on('mousemove', mouseMoveHandler).
         on('mouseup', mouseUpHandler);
     };
-    var mouseMoveHandler = function(event : JQueryEventObject) {
+    var mouseMoveHandler = (event : JQueryEventObject) => {
       $dlg.css('left', (event.pageX - dragPoint.x) + 'px').
         css('top', (event.pageY - dragPoint.y) + 'px');
     };
-    var mouseUpHandler = function(event : JQueryEventObject) {
+    var mouseUpHandler = (event : JQueryEventObject) => {
       $(document).off('mousemove', mouseMoveHandler).
         off('mouseup', mouseUpHandler);
     };

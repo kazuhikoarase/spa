@@ -2,20 +2,24 @@ namespace app {
 
   spa.view.defineView( (ctx) => {
 
-    var $ui = ctx.getTemplate();
+    // load service for this view.
     var service = ctx.getService<TestViewService>();
 
+    var $ui = ctx.getTemplate();
     var $a = $ui.find('#a');
     var $b = $ui.find('#b');
-    var $res = $ui.find('#res');
-    var $btn = $ui.find('#btn');
 
-    $btn.on('click', (event) => {
-      service.add({ a: +$a.val(), b: +$b.val() }, (res) => {
-        $res.val('' + res);
+    $ui.find('#addBtn').on('click', (event) => {
+      service.add({ a : +$a.val(), b : +$b.val() }, (res) => {
+        $ui.find('#res').val('' + res);
+      });
+    });
+    $ui.find('#subBtn').on('click', (event) => {
+      service.subtract({ a : +$a.val(), b : +$b.val() }, (res) => {
+        $ui.find('#res').val('' + res);
       });
     });
 
     return $ui;
-  }, '/app/TestView');
+  });
 }

@@ -6,7 +6,7 @@ declare namespace spa.view {
   }
 
   var defineView : (initializer : (ctx : ViewContext) => JQuery,
-      name : string) => void;
+      viewName? : string) => void;
 
   var loadView : (name : string,
       onload : ($ui : JQuery) => void) => void;

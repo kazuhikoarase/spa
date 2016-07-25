@@ -1,17 +1,21 @@
 namespace app {
 
+  declare type AsyncFunc<P,R> = spa.service.AsyncFunc<P,R>;
+
+   // at first, declare an interface.
   export interface TestViewService extends spa.service.ViewService {
-    add : spa.service.AsyncFunc<{ a : number, b : number }, number>;
-    subtract : spa.service.AsyncFunc<{ a : number, b : number }, number>;
+    add : AsyncFunc<{ a : number, b : number }, number>;
+    subtract : AsyncFunc<{ a : number, b : number }, number>;
   }
 
+  // then, implement it.
   spa.service.defineService(<TestViewService>{
 
     add : (params, rh) => {
-      console.log('here is server');
+      console.log('hello, here is server.');
       rh(params.a + params.b); },
 
     subtract : (params, rh) => rh(params.a - params.b)
 
-  }, '/app/TestViewService');
+  });
 }

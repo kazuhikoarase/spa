@@ -14,6 +14,7 @@ import java.io.Reader;
 import java.net.URL;
 
 import javax.script.ScriptEngine;
+import javax.script.ScriptException;
 
 public class Context {
 
@@ -29,13 +30,13 @@ public class Context {
         return getClass().getResource(path);
     }
 
-    public Object evalfile(String path) throws Exception {
+    public Object evalfile(String path) throws IOException, ScriptException {
         URL url = getResource(path);
         if (url == null) {
             throw new NullPointerException("not found:" + path);
         }
         Reader in = new InputStreamReader(
-                url.openStream(), UTF_8);
+                new BufferedInputStream(url.openStream() ), UTF_8);
         try {
             se.put(ScriptEngine.FILENAME, path);
             return se.eval(in);
@@ -44,12 +45,13 @@ public class Context {
         }
     }
 
-    public String getResourceAsString(String path) throws Exception {
+    public String getResourceAsString(String path) throws IOException {
         URL url = getResource(path);
         if (url == null) {
             throw new NullPointerException("not found:" + path);
         }
-        Reader in = new InputStreamReader(url.openStream(), UTF_8);
+        Reader in = new InputStreamReader(
+                new BufferedInputStream(url.openStream() ), UTF_8);
         try {
             int c;
             StringBuilder buf = new StringBuilder();

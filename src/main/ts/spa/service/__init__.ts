@@ -8,6 +8,8 @@ namespace spa.service {
 
   export var defineService = (
       service : ViewService, serviceName? : string) => {
+    var serviceName = serviceName || __current_filename__.
+      substring(0, __current_filename__.length - 3);
     services[serviceName] = service;
   };
 

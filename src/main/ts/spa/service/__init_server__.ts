@@ -9,17 +9,45 @@ namespace spa.service {
   declare var _ctx : any;
   declare var _logger : any;
   declare var _assetsPrefix : any;
-  
+
   var enc = 'UTF-8';
 
   export var getLogger = () => _logger;
 
-  var invoke = function(req : any) : any {
+  var sync = (lock : any, callback : () => void) => {
+    Packages.spa.core.ISync.$.$(lock,
+      new Packages.spa.core.ISync({ scope : callback }) );
+  };
+
+  var invoke = (req : any) => {
     var service : any = getService(req.serviceName);
+    if (!service) {
+      service = loadService(req.serviceName);
+    }
     var result : any = null;
     service[req.methodName](req.params, (r : any) => { result = r; });
     return { result : result };
   };
+
+  var evalfile = (path : string) => {
+    sync(_ctx, () => {
+      spa.__current_filename__ = '' + path;
+      _ctx.evalfile(path);
+      spa.__current_filename__ = null;
+    });
+  };
+
+  var loadService = (serviceName : string) => {
+    evalfile(serviceName + '.js');
+    var service = getService(serviceName);
+    if (service.__requires__) {
+      var modules = service.__requires__;
+      for (var i = 0; i < modules.length; i += 1) {
+        evalfile(modules[i]);
+      }
+    }
+    return service;
+  }
 
   _ctx.setServiceListener(new Packages.spa.servlet.ServiceListener({
 
@@ -69,17 +97,9 @@ namespace spa.service {
       } else if (path.endsWith('Service.js') ) {
 
         var serviceName = '' + path.substring(0, path.length() - 3);
-        _ctx.evalfile(path);
+        loadService(serviceName);
 
-        var service = getService(serviceName);
-        if (service.__requires__) {
-          var modules = service.__requires__;
-          for (var i = 0; i < modules.length; i += 1) {
-            _ctx.evalfile(modules[i]);
-          }
-        }
-
-        response.setContentType('text/javascript;charset=UTF-8');
+        response.setContentType('text/javascript;charset=' + enc);
         var writer = response.getWriter();
         try {
           writer.println(spa.service.getClientServiceScript(serviceName) );
@@ -89,17 +109,19 @@ namespace spa.service {
 
       } else if (path.endsWith('.js') ) {
 
-        response.setContentType('text/javascript;charset=UTF-8');
+        response.setContentType('text/javascript;charset=' + enc);
         var writer = response.getWriter();
         try {
+          writer.println('spa.__current_filename__ = "' + path +'";');
           writer.println(_ctx.getResourceAsString(path) );
+          writer.println('spa.__current_filename__ = null;');
         } finally {
           writer.close();
         }
 
       } else if (path.endsWith('.html') ) {
 
-        response.setContentType('text/html;charset=UTF-8');
+        response.setContentType('text/html;charset=' + enc);
         var writer = response.getWriter();
         try {
           writer.println(_ctx.getResourceAsString(path) );
@@ -136,7 +158,8 @@ namespace spa.service {
       numMethods += 1;
     }
 
-    src += '},svc);}("' + serviceName + '");';
+    src += '},svc);';
+    src += '}("' + serviceName + '");';
 
     return src;
   }

@@ -6,11 +6,11 @@
     xsi:schemaLocation="http://java.sun.com/xml/ns/javaee
                         http://java.sun.com/xml/ns/javaee/web-app_2_5.xsd" >
   <servlet>
-    <servlet-name>spa</servlet-name>
+    <servlet-name>SpaServlet</servlet-name>
     <servlet-class>spa.servlet.SpaServlet</servlet-class>
   </servlet>
   <servlet-mapping>
-    <servlet-name>spa</servlet-name>
-    <url-pattern>/spa/*</url-pattern>
+    <servlet-name>SpaServlet</servlet-name>
+    <url-pattern>/SPA/*</url-pattern>
   </servlet-mapping>
 </web-app>

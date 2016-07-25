@@ -4,15 +4,17 @@
     <meta http-equiv="Content-Type" content="text/html;charset=UTF-8" />
     <link rel="stylesheet" href="assets/style.css" type="text/css" />
     <script type="text/javascript" src="assets/jquery-2.1.1.min.js"></script>
-    <script type="text/javascript" src="spa/client.js"></script>
+    <script type="text/javascript" src="SPA/client.js"></script>
     <script type="text/javascript">
 
-$( () => {
+$(function() {
 
+  // append on body.
   spa.view.loadView('/app/TestView', function($ui) {
     $('BODY').append($ui);
   });
 
+  // open as sub window.
   spa.view.loadView('/app/TestView', function($ui) {
     spa.ui.showDialog({
       title : 'Test',

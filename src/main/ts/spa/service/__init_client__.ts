@@ -9,16 +9,16 @@ namespace spa.service {
       (serviceName, methodName) => (params, resultHandler, errorHandler) => {
     $.ajax({
       type: 'POST',
-      url: 'spa/invoker',
+      url: spa.__context_path__ + spa.__servlet_path__ + '/invoker',
       contentType: 'application/json',
       data: JSON.stringify({
         serviceName : serviceName,
         methodName : methodName,
         params : params
       })
-    }).done(function(data) {
+    }).done( (data) => {
       resultHandler(data.result);
-    }).fail(function() {
+    }).fail( () => {
       if (errorHandler) {
         errorHandler();
       }
