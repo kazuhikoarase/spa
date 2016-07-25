@@ -1,21 +1,28 @@
 declare namespace spa.view {
 
   interface ViewContext {
-    getService : <S extends spa.service.ViewService>() => S;
+    getService : <S>() => S;
     getTemplate : () => JQuery;
   }
 
-  var defineView : (initializer : (ctx : ViewContext) => JQuery,
-      viewName? : string) => void;
+  interface ViewFactory { (ctx : ViewContext) : JQuery }
 
-  var loadView : (name : string,
-      onload : ($ui : JQuery) => void) => void;
+  interface ViewDef {
+    name? : string;
+    newInstance : ViewFactory;
+  }
+
+  var defineView : (viewDef : ViewDef) => void;
+
+  var loadView : (name : string, onload : ($ui : JQuery) => void) => void;
 }
 
 declare namespace spa.service {
 
-  interface ViewService {
-    __requires__? : string[]
+  interface ServiceDef<S> {
+    name? : string;
+    service : S;
+    __requires__? : string[];
   }
 
   type AsyncFunc<P,R> = (
@@ -24,9 +31,9 @@ declare namespace spa.service {
       errorHandler? : () => void
     ) => void;
 
-  var defineService : (service : ViewService, serviceName? : string) => void;
+  var defineService : (serviceDef : ServiceDef<any>) => void;
 
-  var getService : (serviceName : string) => ViewService;
+  var getServiceDef : <S>(name : string) => ServiceDef<S>;
 }
 
 declare module spa.ui {

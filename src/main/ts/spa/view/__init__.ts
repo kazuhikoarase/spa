@@ -4,14 +4,12 @@
 
 namespace spa.view {
 
-  var initializers : { [viewName : string] :
-    (ctx : ViewContext) => JQuery} = {};
+  var viewDefs : { [viewName : string] : ViewDef } = {};
 
-  export var defineView = (initializer : (ctx : ViewContext) => JQuery,
-        viewName? : string) => {
-    var viewName = viewName || __current_filename__.
+  export var defineView = (viewDef : ViewDef) => {
+    var viewName : string = viewDef.name || __current_filename__.
       substring(0, __current_filename__.length - 3);
-    initializers[viewName] = initializer;
+    viewDefs[viewName] = viewDef;
   };
 
   var suffixList : string[] = [ '.html', '.js', 'Service.js' ];
@@ -35,9 +33,9 @@ namespace spa.view {
         }
 
         // all files are loaded,
-        var initializer = initializers[viewName];
-        var $ui = initializer({
-          getService : () => spa.service.getService(viewName + 'Service'),
+        var $ui = viewDefs[viewName].newInstance({
+          getService : () => spa.service.getServiceDef(
+            viewName + 'Service').service,
           getTemplate : () => $template
         });
         onload($ui);

@@ -1,8 +1,8 @@
 namespace app {
 
-  spa.view.defineView( (ctx) => {
+  var newInstance : spa.view.ViewFactory = (ctx) => {
 
-    // load service for this view.
+    // get the service for this view.
     var service = ctx.getService<TestViewService>();
 
     var $ui = ctx.getTemplate();
@@ -21,5 +21,7 @@ namespace app {
     });
 
     return $ui;
-  });
+  };
+
+  spa.view.defineView({ newInstance : newInstance });
 }

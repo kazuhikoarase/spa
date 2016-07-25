@@ -20,7 +20,7 @@ namespace spa.service {
   };
 
   var invoke = (req : any) => {
-    var service : any = getService(req.serviceName);
+    var service : any = getServiceDef<any>(req.serviceName).service;
     if (!service) {
       service = loadService(req.serviceName);
     }
@@ -39,14 +39,14 @@ namespace spa.service {
 
   var loadService = (serviceName : string) => {
     evalfile(serviceName + '.js');
-    var service = getService(serviceName);
-    if (service.__requires__) {
-      var modules = service.__requires__;
+    var serviceDef = getServiceDef(serviceName);
+    if (serviceDef.__requires__) {
+      var modules = serviceDef.__requires__;
       for (var i = 0; i < modules.length; i += 1) {
         evalfile(modules[i]);
       }
     }
-    return service;
+    return serviceDef.service;
   }
 
   _ctx.setServiceListener(new Packages.spa.servlet.ServiceListener({
@@ -141,9 +141,9 @@ namespace spa.service {
 
     src += '!function(svc){';
     src += 'var cs = spa.service.clientService;';
-    src += 'spa.service.defineService({';
+    src += 'spa.service.defineService({name:svc,service:{';
 
-    var service = getService(serviceName);
+    var service = getServiceDef(serviceName).service;
     var methodName : string;
     var numMethods = 0;
 
@@ -158,7 +158,7 @@ namespace spa.service {
       numMethods += 1;
     }
 
-    src += '},svc);';
+    src += '}});';
     src += '}("' + serviceName + '");';
 
     return src;

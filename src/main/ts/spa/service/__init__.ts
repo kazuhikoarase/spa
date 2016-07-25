@@ -4,14 +4,14 @@
 
 namespace spa.service {
 
-  var services : { [serviceName : string] : ViewService } = {};
+  var services : { [serviceName : string] : ServiceDef<any> } = {};
 
-  export var defineService = (
-      service : ViewService, serviceName? : string) => {
-    var serviceName = serviceName || __current_filename__.
+  export var defineService = (serviceDef : ServiceDef<any>) => {
+    var serviceName : string = serviceDef.name || __current_filename__.
       substring(0, __current_filename__.length - 3);
-    services[serviceName] = service;
+    services[serviceName] = serviceDef;
   };
 
-  export var getService = (serviceName : string) => services[serviceName];
+  export var getServiceDef =
+    <S>(serviceName : string) => services[serviceName];
 }
