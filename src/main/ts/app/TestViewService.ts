@@ -4,20 +4,44 @@ namespace app {
 
   // at first, declare an interface.
   export interface TestViewService {
-    add : AsyncFunc<{ a : number, b : number }, number>;
-    subtract : AsyncFunc<{ a : number, b : number }, number>;
+    init : AsyncFunc<{}, TestViewModel>;
+    exec : AsyncFunc<{ model : TestViewModel }, TestViewModel>;
   }
 
   // then, implement it.
   var service : TestViewService = {
 
-    add : (params, rh) => {
-      console.log('hello, here is server.');
-      rh(params.a + params.b); },
+    init : (params, rh) => {
+      // initial model
+      var model : TestViewModel = {
+        a : '1',
+        b : '2',
+        ope : '',
+        res : '?'
+      };
+      rh(model);
+    },
 
-    subtract : (params, rh) => rh(params.a - params.b)
+    exec : (params, rh) => {
 
+      var model = params.model;
+
+      // do something on server...
+      var a = +model.a;
+      var b = +model.b;
+      if (model.ope == '+') {
+        model.res = '' + (a + b);
+      } else if (model.ope == '-') {
+        model.res = '' + (a - b);
+      } else {
+      }
+
+      rh(params.model);
+    }
   };
 
-  spa.service.defineService({ service : service });
+  spa.service.defineService({
+    __requires__ : [], // additional modules.
+    service : service
+  });
 }

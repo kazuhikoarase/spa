@@ -1,0 +1,12 @@
+<project default="dist" basedir="../..">
+  <property name="build" location="build" />
+  <property name="dist" location="dist" />
+  <target name="dist">
+    <delete file="${dist}/spa.jar" />
+    <jar destfile="${dist}/spa.jar">
+      <zipfileset dir="${build}/classes">
+        <include name="spa/**/*" />
+      </zipfileset>
+    </jar>
+  </target>
+</project>

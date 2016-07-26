@@ -1,27 +1,57 @@
 namespace app {
 
-  var newInstance : spa.view.ViewFactory = (ctx) => {
+  var newInstance : spa.view.ViewFactory<
+    TestViewModel, TestViewService
+  > = (ctx) => {
 
     // get the service for this view.
-    var service = ctx.getService<TestViewService>();
+    var service = ctx.getService();
 
-    var $ui = ctx.getTemplate();
-    var $a = $ui.find('#a');
-    var $b = $ui.find('#b');
+    var $view = ctx.getTemplate();
 
-    $ui.find('#addBtn').on('click', (event) => {
-      service.add({ a : +$a.val(), b : +$b.val() }, (res) => {
-        $ui.find('#res').val('' + res);
-      });
-    });
-    $ui.find('#subBtn').on('click', (event) => {
-      service.subtract({ a : +$a.val(), b : +$b.val() }, (res) => {
-        $ui.find('#res').val('' + res);
+    $view.find('#addBtn').on('click', (event) => {
+      var model = ctx.getModel();
+      model.ope = '+';
+      service.exec({ model : model }, (model) => {
+        ctx.setModel(model);
       });
     });
 
-    return $ui;
+    $view.find('#subBtn').on('click', (event) => {
+      var model = ctx.getModel();
+      model.ope = '-';
+      service.exec({ model : model }, (model) => {
+        ctx.setModel(model);
+      });
+    });
+
+    service.init({}, (model) => {
+      ctx.setModel(model);
+    });
+
+    return $view;
   };
 
-  spa.view.defineView({ newInstance : newInstance });
+  spa.view.defineView({
+
+    newInstance : newInstance,
+
+    /**
+     * called before call server.
+     */
+    viewToModel : ($view, model) => {
+      model.a = $view.find('#a').val();
+      model.b = $view.find('#b').val();
+      model.res = $view.find('#res').val();
+    },
+
+    /**
+     * called after call server.
+     */
+    modelToView : (model, $view) => {
+      $view.find('#a').val(model.a);
+      $view.find('#b').val(model.b);
+      $view.find('#res').val(model.res);
+    }
+  });
 }

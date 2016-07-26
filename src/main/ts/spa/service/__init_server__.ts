@@ -8,7 +8,6 @@ namespace spa.service {
   declare var Packages : any;
   declare var _ctx : any;
   declare var _logger : any;
-  declare var _assetsPrefix : any;
 
   var enc = 'UTF-8';
 
@@ -20,10 +19,11 @@ namespace spa.service {
   };
 
   var invoke = (req : any) => {
-    var service : any = getServiceDef<any>(req.serviceName).service;
-    if (!service) {
-      service = loadService(req.serviceName);
+    var serviceDef = getServiceDef<any>(req.serviceName);
+    if (!serviceDef) {
+      serviceDef = loadService<any>(req.serviceName);
     }
+    var service = serviceDef.service;
     var result : any = null;
     service[req.methodName](req.params, (r : any) => { result = r; });
     return { result : result };
@@ -37,16 +37,16 @@ namespace spa.service {
     });
   };
 
-  var loadService = (serviceName : string) => {
-    evalfile(serviceName + '.js');
-    var serviceDef = getServiceDef(serviceName);
+  var loadService = <S>(serviceName : string) => {
+    evalfile(serviceName + '.js'); 
+    var serviceDef = getServiceDef<S>(serviceName);
     if (serviceDef.__requires__) {
       var modules = serviceDef.__requires__;
       for (var i = 0; i < modules.length; i += 1) {
         evalfile(modules[i]);
       }
     }
-    return serviceDef.service;
+    return serviceDef;
   }
 
   _ctx.setServiceListener(new Packages.spa.servlet.ServiceListener({
@@ -97,7 +97,7 @@ namespace spa.service {
       } else if (path.endsWith('Service.js') ) {
 
         var serviceName = '' + path.substring(0, path.length() - 3);
-        loadService(serviceName);
+        loadService<any>(serviceName);
 
         response.setContentType('text/javascript;charset=' + enc);
         var writer = response.getWriter();
@@ -130,7 +130,7 @@ namespace spa.service {
         }
 
       } else {
-
+        response.sendError(404, path);
       }
     }
   }) );

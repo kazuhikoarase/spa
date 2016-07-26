@@ -1,18 +1,22 @@
 declare namespace spa.view {
 
-  interface ViewContext {
-    getService : <S>() => S;
+  interface ViewContext<M,S> {
+    getService : () => S;
     getTemplate : () => JQuery;
+    getModel : () => M;
+    setModel : (model : M) => void;
   }
 
-  interface ViewFactory { (ctx : ViewContext) : JQuery }
+  interface ViewFactory<M,S> { (ctx : ViewContext<M,S>) : JQuery }
 
-  interface ViewDef {
+  interface ViewDef<M,S> {
     name? : string;
-    newInstance : ViewFactory;
+    newInstance : ViewFactory<M,S>;
+    viewToModel : ($view : JQuery, model : M) => void;
+    modelToView : (model : M, $view : JQuery) => void;
   }
 
-  var defineView : (viewDef : ViewDef) => void;
+  var defineView : <M,S>(viewDef : ViewDef<M,S>) => void;
 
   var loadView : (name : string, onload : ($ui : JQuery) => void) => void;
 }
