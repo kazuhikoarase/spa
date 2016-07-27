@@ -20,7 +20,6 @@ namespace spa.ui {
     return $btn;
   };
 
-
   var dialogsKey = '__spa_dialogs__';
 
   var getDialogs = (ctx : DialogContext) => {
@@ -42,11 +41,23 @@ namespace spa.ui {
     MAXIMIZED : 'maximized'
   };
 
-  var crtBtn = () => createSVG(12, 12).
+  interface WindowRect {
+    left : string;
+    top : string;
+    width : number;
+    height : number;
+  };
+
+  var btnFill = '#999999';
+  var btnStroke = '#333333';
+  var btnSize = 15;
+  var btnSymGap = 2.5;
+
+  var crtBtn = () => createSVG(btnSize, btnSize).
       css('float', 'right').css('margin-left', '2px').
       append(createSVGElement('rect').attr({
-          x : 0, y : 0, width: 12, height: 12,
-          fill: '#999999', stroke: 'none'}) ).
+          x : 0, y : 0, width: btnSize, height: btnSize,
+          fill: btnFill, stroke: 'none'}) ).
       on('mouseover', function(event) { $(this).css('opacity', '0.7'); } ).
       on('mouseout', function(event) { $(this).css('opacity', ''); } ).
       on('mousedown', function(event) {
@@ -54,12 +65,29 @@ namespace spa.ui {
         event.stopPropagation();
       });
 
+  var path = () => {
+    var d = '';
+    var builder = {
+     m : (x : number, y : number) => {
+       d += 'M' + x + ' ' + y;
+       return builder;
+     },
+     l : (x : number, y : number) => {
+       d += 'L' + x + ' ' + y;
+       return builder;
+     },
+     build : () => {
+       return createSVGElement('path').attr({
+          d: d});
+     }
+    };
+    return builder;
+  };
+
   export var showDialog = (ctx : DialogContext) => {
 
-    var windowState = WindowState.NORMAL;
-
-    var lastWindowRect : { left : string, top : string,
-      width : number, height : number } = null;
+    var windowState : string = null;
+    var lastWindowRect : WindowRect = null;
     var minimized = false;
     var maximized = false;
 
@@ -74,6 +102,7 @@ namespace spa.ui {
         return;
       }
       windowState = newWindowState;
+      console.log(windowState);
       if (windowState == WindowState.NORMAL) {
         restoreRect();
       } else if (windowState == WindowState.MINIMIZED) {
@@ -82,6 +111,10 @@ namespace spa.ui {
         storeRect();
         maximize();
       }
+      $normalSymbol.css('display',
+        windowState != WindowState.NORMAL? '' : 'none');
+      $maximumSymbol.css('display',
+        windowState == WindowState.NORMAL? '' : 'none');
     };
 
     var storeRect = () => {
@@ -94,6 +127,9 @@ namespace spa.ui {
     };
 
     var restoreRect = () => {
+      if (lastWindowRect == null) {
+        return;
+      }
       $dlg.css('left', lastWindowRect.left).
         css('top', lastWindowRect.top).
         css('width', lastWindowRect.width + 'px').
@@ -108,25 +144,45 @@ namespace spa.ui {
     };
 
     var $minimizeButton = crtBtn().append(
-        createSVGElement('path').attr({ d: 'M 2 10 L 10 10',
-          fill: 'none', stroke: '#333333', 'stroke-width' : '2'}) ).
+        path().m(btnSymGap, btnSize - btnSymGap).
+          l(btnSize - btnSymGap, btnSize - btnSymGap).build().
+        attr({fill: 'none', stroke: btnStroke, 'stroke-width' : '1'}) ).
       on('mouseup', (event) => {
-        //minimized = !minimized;
-        //updateWindowState();
+        minimized = !minimized;
+        updateWindowState();
       });
 
-    var $maximizeButton = crtBtn().append(
-        createSVGElement('rect').attr({
-          x : 2, y : 2, width: 8, height: 8,
-          fill: 'none', stroke: '#333333', 'stroke-width' : '2'}) ).
+    var $normalSymbol = createSVGElement('g').
+      append(createSVGElement('rect').attr({
+          x : btnSymGap + 2, y : btnSymGap,
+          width: btnSize - btnSymGap * 2 - 2,
+          height: btnSize - btnSymGap * 2 - 2,
+          fill: btnFill, stroke: btnStroke, 'stroke-width' : '1'}) ).
+      append(createSVGElement('rect').attr({
+          x : btnSymGap, y : btnSymGap + 2,
+          width: btnSize - btnSymGap * 2 - 2,
+          height: btnSize - btnSymGap * 2 - 2,
+          fill: btnFill, stroke: btnStroke, 'stroke-width' : '1'}) );
+
+    var $maximumSymbol = createSVGElement('g').
+      append(createSVGElement('rect').attr({
+          x : btnSymGap, y : btnSymGap,
+          width: btnSize - btnSymGap * 2, height: btnSize - btnSymGap * 2,
+          fill: 'none', stroke: btnStroke, 'stroke-width' : '1'}) );
+
+    var $maximizeButton = crtBtn().
+      append($normalSymbol).append($maximumSymbol).
       on('mouseup', (event) => {
         maximized = !maximized;
         updateWindowState();
       });
 
     var $closeButton = crtBtn().append(
-        createSVGElement('path').attr({ d: 'M 2 2 L 10 10 M 2 10 L 10 2',
-          fill: 'none', stroke: '#333333', 'stroke-width' : '2'}) ).
+        path().m(btnSymGap, btnSymGap).
+          l(btnSize - btnSymGap, btnSize - btnSymGap).
+          m(btnSymGap, btnSize - btnSymGap).
+          l(btnSize - btnSymGap, btnSymGap).build().
+        attr({ fill: 'none', stroke: btnStroke, 'stroke-width' : '2'}) ).
       on('mouseup', (event) => {
         dispose();
       });
@@ -134,6 +190,8 @@ namespace spa.ui {
     if (!ctx.showCloseButton) {
       $closeButton.css('display', 'none');
     }
+    // pending
+    $minimizeButton.css('display', 'none');
 
     var parentResizeHandler = (event : JQueryEventObject) => {
       if (windowState == WindowState.MAXIMIZED) {
@@ -202,6 +260,7 @@ namespace spa.ui {
     ctx.$parent.append($dlg).on('contentResize', parentResizeHandler);
 
     $dlg.css('left', '0px').css('top', '0px');
+    updateWindowState();
 
     getDialogs(ctx).push($dlg);
 
