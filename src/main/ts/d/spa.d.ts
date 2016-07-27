@@ -43,8 +43,9 @@ declare namespace spa.service {
 declare module spa.ui {
 
   interface DialogContext {
-    title : string;
+    $parent : JQuery;
     $content : JQuery;
+    title? : string;
     showCloseButton? : boolean;
   }
 

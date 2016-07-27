@@ -8,7 +8,9 @@
     <script type="text/javascript">
 
 $(function() {
-
+  $(window).on('resize', function(event) {
+    $('#content').trigger('contentResize');
+  });
   // append on body.
   spa.view.loadView('/app/TestView', function($ui) {
     $('BODY').append($ui);
@@ -17,8 +19,9 @@ $(function() {
   // open as sub window.
   spa.view.loadView('/app/TestView', function($ui) {
     spa.ui.showDialog({
-      title : 'Test',
+      $parent : $('#content'),
       $content : $ui,
+      title : 'Test',
       showCloseButton : true
     });
   });
@@ -28,5 +31,7 @@ $(function() {
     </script>
   </head>
   <body>
+  <div id="content"
+  style="position:absolute;left:0px;right:0px;top:0px;bottom:0px;"></div>
   </body>
 </html>
