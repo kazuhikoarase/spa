@@ -34,6 +34,7 @@ public class SpaServlet extends HttpServlet {
 
     private String[] serverResources = {
         "/__init__.js",
+        "/util/__init__.js",
         "/service/__init__.js",
         "/service/__init_server__.js"
     };

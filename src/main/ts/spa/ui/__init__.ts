@@ -46,9 +46,14 @@ namespace spa.ui {
     top : string;
     width : number;
     height : number;
-  };
+  }
 
-  var btnFill = '#999999';
+  type Point = {
+    x : number;
+    y : number;
+  }
+
+  var btnFill = '#aaaaaa';
   var btnStroke = '#333333';
   var btnSize = 15;
   var btnSymGap = 2.5;
@@ -76,10 +81,7 @@ namespace spa.ui {
        d += 'L' + x + ' ' + y;
        return builder;
      },
-     build : () => {
-       return createSVGElement('path').attr({
-          d: d});
-     }
+     build : () => createSVGElement('path').attr({ d: d })
     };
     return builder;
   };
@@ -227,18 +229,22 @@ namespace spa.ui {
       setDialogs(ctx, newDialogs);
     };
 
-    var dragPoint : { x : number, y : number } = null;
+    var dragPoint : Point = null;
     var mouseDownHandler = (event : JQueryEventObject) => {
       if (windowState == WindowState.MAXIMIZED) {
         return;
       }
       event.preventDefault();
       toFront();
+      var parentOff = ctx.$parent.offset();
       var off = $dlg.offset();
-      dragPoint = { x : event.pageX - off.left, y : event.pageY - off.top };
+      dragPoint = { 
+        x : event.pageX - off.left + parentOff.left,
+        y : event.pageY - off.top + parentOff.top };
       $(document).on('mousemove', mouseMoveHandler).
         on('mouseup', mouseUpHandler);
     };
+    
     var mouseMoveHandler = (event : JQueryEventObject) => {
       $dlg.css('left', (event.pageX - dragPoint.x) + 'px').
         css('top', (event.pageY - dragPoint.y) + 'px');
@@ -248,16 +254,21 @@ namespace spa.ui {
         off('mouseup', mouseUpHandler);
     };
 
-    var $dlg = $('<div></div>').addClass('dialog-frame').
-      css('position', 'absolute').
-      append($('<div></div>').addClass('dialog-title').
+    var $titlebar = $('<div></div>').addClass('dialog-title').
         css('cursor', 'default').text(ctx.title).
         append($closeButton).
         append($maximizeButton).
         append($minimizeButton).
-        append($('<br style="clear:both;" />') ).
-        on('mousedown', mouseDownHandler) ).append(ctx.$content);
-    ctx.$parent.append($dlg).on('contentResize', parentResizeHandler);
+        append($('<br/>').css('clear', 'both') ).
+        on('mousedown', mouseDownHandler);
+
+    var $dlg = $('<div></div>').addClass('dialog-frame').
+      css('position', 'absolute').
+      append($titlebar).
+      append(ctx.$content);
+
+    ctx.$parent.append($dlg).
+      on('contentResize', parentResizeHandler);
 
     $dlg.css('left', '0px').css('top', '0px');
     updateWindowState();

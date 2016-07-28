@@ -89,7 +89,7 @@ namespace spa.service {
         response.setContentType('application/json;charset=' + enc);
         var resOut = response.getOutputStream();
         try {
-          resOut.write(res);
+          resOut.write(res, 0, res.length);
         } finally {
           resOut.close();
         }
