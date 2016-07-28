@@ -1,31 +1,30 @@
 namespace app {
 
-  var newInstance : spa.view.ViewFactory<
-    TestViewModel, TestViewService
-  > = (ctx) => {
+  var newInstance : spa.view.ViewFactory<TestViewModel, TestViewService> =
+      function(ctx) {
 
     // get the service for this view.
     var service = ctx.getService();
 
     var $view = ctx.getTemplate();
 
-    $view.find('#addBtn').on('click', (event) => {
+    $view.find('#addBtn').on('click', function(event) {
       var model = ctx.getModel();
       model.ope = '+';
-      service.exec({ model : model }, (model) => {
+      service.exec({ model : model }, function(model) {
         ctx.setModel(model);
       });
     });
 
-    $view.find('#subBtn').on('click', (event) => {
+    $view.find('#subBtn').on('click', function(event) {
       var model = ctx.getModel();
       model.ope = '-';
-      service.exec({ model : model }, (model) => {
+      service.exec({ model : model }, function(model) {
         ctx.setModel(model);
       });
     });
 
-    service.init({}, (model) => {
+    service.init({}, function(model) {
       ctx.setModel(model);
     });
 

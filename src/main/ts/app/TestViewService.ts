@@ -11,7 +11,7 @@ namespace app {
   // then, implement it.
   var service : TestViewService = {
 
-    init : (params, rh) => {
+    init : function(params, rh) {
       // initial model
       var model : TestViewModel = {
         a : '1',
@@ -22,7 +22,7 @@ namespace app {
       rh(model);
     },
 
-    exec : (params, rh) => {
+    exec : function(params, rh) {
 
       var model = params.model;
 

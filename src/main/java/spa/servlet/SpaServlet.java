@@ -1,7 +1,9 @@
 package spa.servlet;
 
+import java.io.File;
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.net.URL;
 import java.util.logging.Logger;
 
 import javax.script.ScriptEngine;
@@ -10,7 +12,9 @@ import javax.servlet.ServletConfig;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletRequestWrapper;
 import javax.servlet.http.HttpServletResponse;
+import javax.servlet.http.HttpSession;
 
 import spa.core.Context;
 
@@ -91,7 +95,7 @@ public class SpaServlet extends HttpServlet {
                 out.close();
             }
         } else {
-            listener.service(request, response);
+            listener.service(new SessionlessRequest(request), response);
         }
     }
 
@@ -99,8 +103,33 @@ public class SpaServlet extends HttpServlet {
         public SpaContext(ScriptEngine se) {
             super(se);
         }
+        @Override
+        public URL getResource(String path) throws IOException {
+            File file = new File(getServletContext().
+                    getRealPath("/WEB-INF/classes" + path) );
+            if (file.exists() ) {
+                logger.info("found resource under WEB-INF:" + path);
+                return file.toURI().toURL();
+            }
+            return super.getResource(path);
+        }
         public void setServiceListener(ServiceListener listener) {
             SpaServlet.this.listener = listener;
+        }
+    }
+
+    protected static class SessionlessRequest
+    extends HttpServletRequestWrapper {
+        public SessionlessRequest(HttpServletRequest request) {
+            super(request);
+        }
+        @Override
+        public HttpSession getSession() {
+            throw new UnsupportedOperationException("session disabled.");
+        }
+        @Override
+        public HttpSession getSession(boolean create) {
+            throw new UnsupportedOperationException("session disabled.");
         }
     }
 }

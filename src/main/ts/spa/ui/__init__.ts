@@ -123,8 +123,8 @@ namespace spa.ui {
       lastWindowRect = {
         left : $dlg.css('left'),
         top : $dlg.css('top'),
-        width : $dlg.width(),
-        height : $dlg.height()
+        width : $dlg.outerWidth(),
+        height : $dlg.outerHeight()
       };
     };
 

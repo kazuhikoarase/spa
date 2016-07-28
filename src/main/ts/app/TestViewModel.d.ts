@@ -1,6 +1,6 @@
-namespace app {
+declare namespace app {
 
-  export interface TestViewModel {
+  interface TestViewModel {
     /**
      * aahhhh
      */
