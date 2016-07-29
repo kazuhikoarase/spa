@@ -1,3 +1,7 @@
+
+
+/// <reference path="jquery.d.ts"/>
+
 declare namespace spa.view {
 
   interface ViewContext<M,S> {
@@ -42,12 +46,21 @@ declare namespace spa.service {
 
 declare module spa.ui {
 
-  interface DialogContext {
+  interface Rect {
+    x : number|string;
+    y : number|string;
+    width : number;
+    height : number;
+  }
+
+  interface WindowContext {
     $parent : JQuery;
     $content : JQuery;
     title? : string;
+    defaultWindowRect? : Rect;
+    getMaximumRect? : () => Rect;
     showCloseButton? : boolean;
   }
 
-  var showDialog : (ctx : DialogContext) => JQuery;
+  var showWindow : (ctx : WindowContext) => JQuery;
 }

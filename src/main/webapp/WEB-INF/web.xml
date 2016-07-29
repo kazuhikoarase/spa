@@ -8,6 +8,10 @@
   <servlet>
     <servlet-name>SpaServlet</servlet-name>
     <servlet-class>spa.servlet.SpaServlet</servlet-class>
+    <init-param>
+      <param-name>resource-path</param-name>
+      <param-value>/WEB-INF/js,/WEB-INF/tmpl</param-value>
+    </init-param>
   </servlet>
   <servlet-mapping>
     <servlet-name>SpaServlet</servlet-name>

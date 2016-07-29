@@ -43,11 +43,16 @@ public class SpaServlet extends HttpServlet {
         "/service/__init_server__.js"
     };
 
+    private String[] resourcePath = null;
+
     @Override
     public void init(ServletConfig config) throws ServletException {
 
         super.init(config);
-
+        String path = config.getInitParameter("resource-path");
+        if (path != null) {
+            resourcePath = path.split("[\\s,]+");
+        }
         // fixed.
         packagePathPrefix = "/spa";
 
@@ -71,6 +76,10 @@ public class SpaServlet extends HttpServlet {
         final HttpServletRequest request,
         final HttpServletResponse response
     ) throws ServletException, IOException {
+
+        response.setHeader("Cache-Control", "no-cache");
+        response.setHeader("Pragma", "no-cache");
+        response.setIntHeader("Expires", 0);
 
         try {
             context.evalfile(packagePathPrefix +
@@ -105,11 +114,15 @@ public class SpaServlet extends HttpServlet {
         }
         @Override
         public URL getResource(String path) throws IOException {
-            File file = new File(getServletContext().
-                    getRealPath("/WEB-INF/classes" + path) );
-            if (file.exists() ) {
-                logger.info("found resource under WEB-INF:" + path);
-                return file.toURI().toURL();
+            if (resourcePath != null) {
+                for (String prefix : resourcePath) {
+                    File file = new File(getServletContext().
+                            getRealPath(prefix + path) );
+                    if (file.exists() ) {
+                        logger.info("found resource: " + prefix + path);
+                        return file.toURI().toURL();
+                    }
+                }
             }
             return super.getResource(path);
         }

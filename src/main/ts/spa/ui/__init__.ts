@@ -20,19 +20,19 @@ namespace spa.ui {
     return $btn;
   };
 
-  var dialogsKey = '__spa_dialogs__';
+  var windowListKey = '__spa_window_list__';
 
-  var getDialogs = (ctx : DialogContext) => {
-    var dialogs : JQuery[] = ctx.$parent.data(dialogsKey);
-    if (!dialogs) {
-      dialogs = [];
-      ctx.$parent.data(dialogsKey, dialogs);
+  var getWindowList = (ctx : WindowContext) => {
+    var windowList : JQuery[] = ctx.$parent.data(windowListKey);
+    if (!windowList) {
+      windowList = [];
+      ctx.$parent.data(windowListKey, windowList);
     }
-    return dialogs;
+    return windowList;
   };
 
-  var setDialogs = (ctx : DialogContext, dialogs : JQuery[]) => {
-    ctx.$parent.data(dialogsKey, dialogs);
+  var setWindowList = (ctx : WindowContext, windowList : JQuery[]) => {
+    ctx.$parent.data(windowListKey, windowList);
   };
 
   var WindowState = {
@@ -41,14 +41,11 @@ namespace spa.ui {
     MAXIMIZED : 'maximized'
   };
 
-  interface WindowRect {
-    left : string;
-    top : string;
-    width : number;
-    height : number;
-  }
+  var WindowEvent = {
+    DISPOSE_WINDOW : 'disposeWindow'
+  };
 
-  type Point = {
+  interface Point {
     x : number;
     y : number;
   }
@@ -81,15 +78,66 @@ namespace spa.ui {
        d += 'L' + x + ' ' + y;
        return builder;
      },
+     z : () => {
+       d += 'Z';
+       return builder;
+     },
      build : () => createSVGElement('path').attr({ d: d })
     };
     return builder;
   };
 
-  export var showDialog = (ctx : DialogContext) => {
+  var getWindowRect : ($win : JQuery) => Rect = ($win) => {
+    return {
+      x : $win.css('left'),
+      y : $win.css('top'),
+      width : Math.ceil($win.innerWidth() ),
+      height : Math.ceil($win.innerHeight() )
+    };
+  };
+
+  var setWindowRect : ($win : JQuery, rect : Rect) => JQuery = ($win, rect) => {
+    var left = typeof rect.x == 'number'? rect.x + 'px' : rect.x;
+    var top = typeof rect.y == 'number'? rect.y + 'px' : rect.y;
+    $win.css('left', left).
+      css('top', top).
+      css('width', rect.width + 'px').
+      css('height', rect.height + 'px');
+    return $win;
+  };
+
+  var createDragHandler = (
+    mouseDown : (event : JQueryEventObject) => Point,
+    mouseMove : (event : JQueryEventObject, dragPoint : Point) => void,
+    mouseUp? : (event : JQueryEventObject) => void
+  ) => {
+    var dragPoint : Point = null;
+    var mouseDownHandler = (event : JQueryEventObject) => {
+      dragPoint = mouseDown(event);
+      if (dragPoint == null) {
+        return;
+      }
+      $(document).on('mousemove', mouseMoveHandler).
+        on('mouseup', mouseUpHandler);
+    };
+    var mouseMoveHandler = (event : JQueryEventObject) => {
+      mouseMove(event, dragPoint);
+    };
+    var mouseUpHandler = (event : JQueryEventObject) => {
+      if (mouseUp) {
+        mouseUp(event);
+      }
+      $(document).off('mousemove', mouseMoveHandler).
+        off('mouseup', mouseUpHandler);
+    };
+    return mouseDownHandler;
+  };
+
+  export var showWindow = (ctx : WindowContext) => {
 
     var windowState : string = null;
-    var lastWindowRect : WindowRect = null;
+    var lastWindowRect : Rect = null;
+
     var minimized = false;
     var maximized = false;
 
@@ -104,7 +152,6 @@ namespace spa.ui {
         return;
       }
       windowState = newWindowState;
-      console.log(windowState);
       if (windowState == WindowState.NORMAL) {
         restoreRect();
       } else if (windowState == WindowState.MINIMIZED) {
@@ -120,29 +167,27 @@ namespace spa.ui {
     };
 
     var storeRect = () => {
-      lastWindowRect = {
-        left : $dlg.css('left'),
-        top : $dlg.css('top'),
-        width : $dlg.outerWidth(),
-        height : $dlg.outerHeight()
-      };
+      lastWindowRect = getWindowRect($win)
     };
 
     var restoreRect = () => {
       if (lastWindowRect == null) {
         return;
       }
-      $dlg.css('left', lastWindowRect.left).
-        css('top', lastWindowRect.top).
-        css('width', lastWindowRect.width + 'px').
-        css('height', lastWindowRect.height + 'px');
+      setWindowRect($win, lastWindowRect);
     };
 
+    var defaultGetMaximumRect : () => Rect = () => {
+      return { x : 0, y : 0,
+        width : ctx.$parent.width(),
+        height : ctx.$parent.height() };
+    };
+
+    var getMaximumRect : () => Rect = ctx.getMaximumRect?
+      ctx.getMaximumRect : defaultGetMaximumRect;
+
     var maximize = () => {
-      $dlg.css('left', '0px').
-        css('top', '0px').
-        css('width', ctx.$parent.width() + 'px').
-        css('height', ctx.$parent.height() + 'px');
+      setWindowRect($win, getMaximumRect() );
     };
 
     var $minimizeButton = crtBtn().append(
@@ -186,7 +231,7 @@ namespace spa.ui {
           l(btnSize - btnSymGap, btnSymGap).build().
         attr({ fill: 'none', stroke: btnStroke, 'stroke-width' : '2'}) ).
       on('mouseup', (event) => {
-        dispose();
+        $win.trigger(WindowEvent.DISPOSE_WINDOW);
       });
 
     if (!ctx.showCloseButton) {
@@ -201,82 +246,120 @@ namespace spa.ui {
       }
     };
 
-    var dispose = () => {
-      var dialogs = getDialogs(ctx);
-      var newDialogs : JQuery[] = [];
-      for (var i = 0; i < dialogs.length; i += 1) {
-        if (dialogs[i] != $dlg) {
-          newDialogs.push(dialogs[i]);
-        }
-      }
-      setDialogs(ctx, newDialogs);
-      $dlg.remove();
-      ctx.$parent.off('contentResize', parentResizeHandler);
-    };
-
     var toFront = () => {
-      var dialogs = getDialogs(ctx);
-      var newDialogs : JQuery[] = [];
-      for (var i = 0; i < dialogs.length; i += 1) {
-        if (dialogs[i] != $dlg) {
-          newDialogs.push(dialogs[i]);
+      var windowList = getWindowList(ctx);
+      var newWindowList : JQuery[] = [];
+      for (var i = 0; i < windowList.length; i += 1) {
+        if (windowList[i] != $win) {
+          newWindowList.push(windowList[i]);
         }
       }
-      newDialogs.push($dlg);
-      for (var i = 0; i < newDialogs.length; i += 1) {
-        newDialogs[i].css('z-index', 1000 + i);
+      newWindowList.push($win);
+      for (var i = 0; i < newWindowList.length; i += 1) {
+        newWindowList[i].css('z-index', 1000 + i);
       }
-      setDialogs(ctx, newDialogs);
+      setWindowList(ctx, newWindowList);
     };
 
-    var dragPoint : Point = null;
-    var mouseDownHandler = (event : JQueryEventObject) => {
-      if (windowState == WindowState.MAXIMIZED) {
-        return;
-      }
-      event.preventDefault();
-      toFront();
-      var parentOff = ctx.$parent.offset();
-      var off = $dlg.offset();
-      dragPoint = { 
-        x : event.pageX - off.left + parentOff.left,
-        y : event.pageY - off.top + parentOff.top };
-      $(document).on('mousemove', mouseMoveHandler).
-        on('mouseup', mouseUpHandler);
-    };
-    
-    var mouseMoveHandler = (event : JQueryEventObject) => {
-      $dlg.css('left', (event.pageX - dragPoint.x) + 'px').
-        css('top', (event.pageY - dragPoint.y) + 'px');
-    };
-    var mouseUpHandler = (event : JQueryEventObject) => {
-      $(document).off('mousemove', mouseMoveHandler).
-        off('mouseup', mouseUpHandler);
-    };
+    var mouseDownHandler : (event : JQueryEventObject) => void =
+        createDragHandler( (event) => {
+          if (windowState == WindowState.MAXIMIZED) {
+            return null;
+          }
+          event.preventDefault();
+          toFront();
+          var parentOff = ctx.$parent.offset();
+          var off = $win.offset();
+          return { 
+            x : event.pageX - off.left + parentOff.left,
+            y : event.pageY - off.top + parentOff.top };
+        }, (event, dragPoint) => {
+          $win.css('left', (event.pageX - dragPoint.x) + 'px').
+            css('top', (event.pageY - dragPoint.y) + 'px');
+        });
 
-    var $titlebar = $('<div></div>').addClass('dialog-title').
+    var $titlebar = $('<div></div>').addClass('window-title').
         css('cursor', 'default').text(ctx.title).
         append($closeButton).
         append($maximizeButton).
         append($minimizeButton).
         append($('<br/>').css('clear', 'both') ).
-        on('mousedown', mouseDownHandler);
+        on('mousedown', mouseDownHandler).
+        on('dblclick', function(event) {
+          $maximizeButton.trigger('mouseup');
+        });
 
-    var $dlg = $('<div></div>').addClass('dialog-frame').
+    var $content = $('<div></div>').addClass('window-content');
+
+    var resizeMouseDownHandler :
+          (event : JQueryEventObject) => void = function() {
+      var $rect : JQuery = null;
+      return createDragHandler( (event) => {
+        if (windowState == WindowState.MAXIMIZED) {
+          return null;
+        }
+        event.preventDefault();
+        toFront();
+        $rect = $('<div></div>').css('position', 'absolute').
+          css('cursor', 'nwse-resize').
+          css('left', '0px').css('top', '0px').
+          css('right', '0px').css('bottom', '0px');
+        console.log('append');
+        $('BODY').append($rect);
+        return {
+          x : event.pageX - $win.width(),
+          y : event.pageY - $win.height() };
+      }, (event, dragPoint) => {
+        var w = Math.max(100, event.pageX - dragPoint.x);
+        var h = Math.max(100, event.pageY - dragPoint.y);
+        $win.css('width', w + 'px').css('height', h + 'px');
+      }, (event) => {
+        console.log('remove');
+        $rect.remove();
+      });
+    }();
+
+    var $resizeKnob = createSVG(8, 8).append(
+      path().m(0, 8).l(8, 0).l(8, 8).z().build().
+        attr({fill: '#666666', stroke: 'none'}) ).
+      css('position', 'absolute').
+      css('cursor', 'nwse-resize').
+      css('bottom', '0px').css('right', '0px').
+      on('mousedown', resizeMouseDownHandler);
+
+    var $win = $('<div></div>').addClass('window-frame').
       css('position', 'absolute').
       append($titlebar).
-      append(ctx.$content);
+      append($content.append(ctx.$content) ).
+      append($resizeKnob).
+      on(WindowEvent.DISPOSE_WINDOW, (event) => {
+        var windowList = getWindowList(ctx);
+        var newWindowList : JQuery[] = [];
+        for (var i = 0; i < windowList.length; i += 1) {
+          if (windowList[i] != $win) {
+            newWindowList.push(windowList[i]);
+          }
+        }
+        setWindowList(ctx, newWindowList);
+        $win.remove();
+        ctx.$parent.off('contentResize', parentResizeHandler);
+      });
 
-    ctx.$parent.append($dlg).
+    if (ctx.defaultWindowRect) {
+      setWindowRect($win, ctx.defaultWindowRect);
+    } else {
+      $win.css('left', '0px').css('top', '0px');
+    }
+
+    ctx.$parent.append($win).
       on('contentResize', parentResizeHandler);
 
-    $dlg.css('left', '0px').css('top', '0px');
     updateWindowState();
 
-    getDialogs(ctx).push($dlg);
+    getWindowList(ctx).push($win);
 
     toFront();
 
-    return $dlg;
+    return $win;
   };
 }

@@ -2,6 +2,7 @@
 <html>
   <head>
     <meta http-equiv="Content-Type" content="text/html;charset=UTF-8" />
+    <meta content="IE=edge" http-equiv="X-UA-Compatible" />
     <link rel="stylesheet" href="assets/style.css" type="text/css" />
     <script type="text/javascript" src="assets/jquery-3.1.0.min.js"></script>
     <script type="text/javascript" src="SPA/client.js"></script>
@@ -13,12 +14,12 @@ $(function() {
   });
   // append on body.
   spa.view.loadView('/app/TestView', function($ui) {
-    $('BODY').append($ui);
+    $('#content').append($ui);
   });
 
   // open as sub window.
   spa.view.loadView('/app/TestView', function($ui) {
-    spa.ui.showDialog({
+    spa.ui.showWindow({
       $parent : $('#content'),
       $content : $ui,
       title : 'Test',
