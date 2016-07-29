@@ -2,7 +2,6 @@
     <wb-module deploy-name="spa">
         <wb-resource deploy-path="/" source-path="/src/main/webapp" tag="defaultRootSource"/>
         <wb-resource deploy-path="/WEB-INF/classes" source-path="/src/main/java"/>
-        <wb-resource deploy-path="/WEB-INF/classes" source-path="/src/main/resources"/>
         <property name="context-root" value="spa"/>
         <property name="java-output-path" value="/spa/build/classes"/>
     </wb-module>
