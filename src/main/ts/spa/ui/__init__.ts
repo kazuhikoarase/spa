@@ -289,10 +289,9 @@ namespace spa.ui {
           $maximizeButton.trigger('mouseup');
         });
 
-    var $content = $('<div></div>').addClass('window-content');
-
-    var resizeMouseDownHandler :
+    var resize_mouseDownHandler :
           (event : JQueryEventObject) => void = function() {
+      var kind : string = null;
       var $rect : JQuery = null;
       return createDragHandler( (event) => {
         if (windowState == WindowState.MAXIMIZED) {
@@ -300,38 +299,80 @@ namespace spa.ui {
         }
         event.preventDefault();
         toFront();
+        kind = $(event.currentTarget).attr('resize-kind');
         $rect = $('<div></div>').css('position', 'absolute').
-          css('cursor', 'nwse-resize').
           css('left', '0px').css('top', '0px').
-          css('right', '0px').css('bottom', '0px');
-        console.log('append');
+          css('right', '0px').css('bottom', '0px').
+//          css('background-color', '#000000').css('opacity', 0.2).
+          css('z-index', 10000). // ja, pending.
+          css('cursor', $(event.currentTarget).css('cursor') );
         $('BODY').append($rect);
         return {
           x : event.pageX - $win.width(),
           y : event.pageY - $win.height() };
       }, (event, dragPoint) => {
+        console.log(kind);
         var w = Math.max(100, event.pageX - dragPoint.x);
         var h = Math.max(100, event.pageY - dragPoint.y);
         $win.css('width', w + 'px').css('height', h + 'px');
       }, (event) => {
-        console.log('remove');
         $rect.remove();
       });
     }();
 
-    var $resizeKnob = createSVG(8, 8).append(
-      path().m(0, 8).l(8, 0).l(8, 8).z().build().
-        attr({fill: '#666666', stroke: 'none'}) ).
+    var barWidth = '4px';
+    var cornerSize = '8px';
+
+    var resizeTbl : { [kind : string] : { x : number, y : number } } = {
+      lt : {x : -1, y : -1}, lb : {x : -1, y : 1},
+      rt : {x :  1, y : -1}, rb : {x :  1, y : 1},
+      l : {x : -1, y :  0}, r : {x : 1, y : 0},
+      t : {x :  0, y : -1}, b : {x : 0, y : 1}
+    };
+
+    var creResize = (kind : string) => $('<div></div>').
+      attr('resize-kind', kind).
       css('position', 'absolute').
-      css('cursor', 'nwse-resize').
-      css('bottom', '0px').css('right', '0px').
-      on('mousedown', resizeMouseDownHandler);
+      on('mousedown', resize_mouseDownHandler);
+    var creCorner = (kind : string) => creResize(kind).
+      addClass('window-frame-resize-corner').
+      css('width', cornerSize).css('height', cornerSize);
+    var creVBar = (kind : string) => creResize(kind).
+      addClass('window-frame-resize-bar').
+      css('width', cornerSize).css('top', '0px').
+      css('bottom', '0px').css('cursor', 'ew-resize');
+    var creHBar = (kind : string) => creResize(kind).
+      addClass('window-frame-resize-bar').
+      css('height', cornerSize).css('left', '0px').
+      css('right', '0px').css('cursor', 'ns-resize');
+
+    var $resizeCorners = {
+      lt : creCorner('lt').css('left', '0px').css('top', '0px').
+        css('cursor', 'nwse-resize'),
+      lb : creCorner('lb').css('left', '0px').css('bottom', '0px').
+        css('cursor', 'nesw-resize'),
+      rt : creCorner('rt').css('right', '0px').css('top', '0px').
+        css('cursor', 'nesw-resize'),
+      rb : creCorner('rb').css('right', '0px').css('bottom', '0px').
+        css('cursor', 'nwse-resize')
+    };
+
+    var $resizeBars = {
+      l : creVBar('l').css('left', '0px'),
+      r : creVBar('r').css('right', '0px'),
+      t : creHBar('t').css('top', '0px'),
+      b : creHBar('b').css('bottom', '0px')
+    };
+
+    var $content = $('<div></div>').css('position', 'absolute').
+      css('left', barWidth).css('top', barWidth).css('right', barWidth).css('bottom', barWidth).
+      addClass('window-content').
+      append($titlebar).
+      append(ctx.$content)/*.
+      append($resizeKnob)*/;
 
     var $win = $('<div></div>').addClass('window-frame').
       css('position', 'absolute').
-      append($titlebar).
-      append($content.append(ctx.$content) ).
-      append($resizeKnob).
       on(WindowEvent.DISPOSE_WINDOW, (event) => {
         var windowList = getWindowList(ctx);
         var newWindowList : JQuery[] = [];
@@ -345,10 +386,18 @@ namespace spa.ui {
         ctx.$parent.off('contentResize', parentResizeHandler);
       });
 
+    $.each($resizeBars, (id, $ui) => {
+      $win.append($ui);
+    });
+    $.each($resizeCorners, (id, $ui) => {
+      $win.append($ui);
+    });
+    $win.append($content);
+
     if (ctx.defaultWindowRect) {
       setWindowRect($win, ctx.defaultWindowRect);
     } else {
-      $win.css('left', '0px').css('top', '0px');
+      setWindowRect($win, { x : 0, y : 0, width : 300, height : 200 });
     }
 
     ctx.$parent.append($win).
