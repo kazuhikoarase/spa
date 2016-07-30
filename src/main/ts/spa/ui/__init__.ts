@@ -142,7 +142,9 @@ namespace spa.ui {
     var maximized = false;
 
     var updateWindowState = () => {
+
       var newWindowState = WindowState.NORMAL;
+
       if (minimized) {
         newWindowState = WindowState.MINIMIZED;
       } else if (maximized) {
@@ -151,7 +153,9 @@ namespace spa.ui {
       if (newWindowState == windowState) {
         return;
       }
+
       windowState = newWindowState;
+
       if (windowState == WindowState.NORMAL) {
         restoreRect();
       } else if (windowState == WindowState.MINIMIZED) {
@@ -160,10 +164,16 @@ namespace spa.ui {
         storeRect();
         maximize();
       }
+
       $normalSymbol.css('display',
         windowState != WindowState.NORMAL? '' : 'none');
       $maximumSymbol.css('display',
         windowState == WindowState.NORMAL? '' : 'none');
+
+      var frameBorderWidth = windowState == WindowState.NORMAL? '4px' : '0px';
+      $content.
+        css('left', frameBorderWidth).css('top', frameBorderWidth).
+        css('right', frameBorderWidth).css('bottom', frameBorderWidth)
     };
 
     var storeRect = () => {
@@ -311,7 +321,7 @@ namespace spa.ui {
           css('left', '0px').css('top', '0px').
           css('right', '0px').css('bottom', '0px').
 //          css('background-color', '#000000').css('opacity', 0.2).
-          css('z-index', 10000). // ja, pending.
+          css('z-index', 10000). // TODO pending.
           css('cursor', $(event.currentTarget).css('cursor') );
         $('BODY').append($rect);
         var off = $win.offset();
@@ -356,8 +366,7 @@ namespace spa.ui {
       });
     }();
 
-    var barWidth = '4px';
-    var cornerSize = '8px';
+    var frameCornerSize = '8px';
 
     var resizeTbl : { [kind : string] : { x : number, y : number } } = {
       lt : {x : -1, y : -1}, lb : {x : -1, y : 1},
@@ -372,14 +381,14 @@ namespace spa.ui {
       on('mousedown', resize_mouseDownHandler);
     var creCorner = (kind : string) => creResize(kind).
       addClass('window-frame-resize-corner').
-      css('width', cornerSize).css('height', cornerSize);
+      css('width', frameCornerSize).css('height', frameCornerSize);
     var creVBar = (kind : string) => creResize(kind).
       addClass('window-frame-resize-bar').
-      css('width', cornerSize).css('top', '0px').
+      css('width', frameCornerSize).css('top', '0px').
       css('bottom', '0px').css('cursor', 'ew-resize');
     var creHBar = (kind : string) => creResize(kind).
       addClass('window-frame-resize-bar').
-      css('height', cornerSize).css('left', '0px').
+      css('height', frameCornerSize).css('left', '0px').
       css('right', '0px').css('cursor', 'ns-resize');
 
     var $resizeCorners = {
@@ -401,11 +410,9 @@ namespace spa.ui {
     };
 
     var $content = $('<div></div>').css('position', 'absolute').
-      css('left', barWidth).css('top', barWidth).css('right', barWidth).css('bottom', barWidth).
       addClass('window-content').
       append($titlebar).
-      append(ctx.$content)/*.
-      append($resizeKnob)*/;
+      append(ctx.$content);
 
     var $win = $('<div></div>').addClass('window-frame').
       css('position', 'absolute').
