@@ -38,16 +38,14 @@ namespace spa.ui {
     y : number;
   }
 
-  var btnFill = '#aaaaaa';
-  var btnStroke = '#333333';
   var btnSize = 15;
   var btnSymGap = 2.5;
 
   var crtBtn = () => createSVG(btnSize, btnSize).
       css('float', 'right').css('margin-left', '2px').
-      append(createSVGElement('rect').attr({
-          x : 0, y : 0, width: btnSize, height: btnSize,
-          fill: btnFill, stroke: 'none'}) ).
+      append(createSVGElement('rect').attr('class', 'window-frame-button').
+      css('stroke', 'none').
+      attr({ x: 0, y: 0, width: btnSize, height: btnSize}) ).
       on('mouseover', function(event) { $(this).css('opacity', '0.7'); } ).
       on('mouseout', function(event) { $(this).css('opacity', ''); } ).
       on('mousedown', function(event) {
@@ -191,29 +189,36 @@ namespace spa.ui {
     var $minimizeButton = crtBtn().append(
         path().m(btnSymGap, btnSize - btnSymGap).
           l(btnSize - btnSymGap, btnSize - btnSymGap).build().
-        attr({fill: 'none', stroke: btnStroke, 'stroke-width' : '1'}) ).
+        attr('class', 'window-frame-button').
+        css('fill', 'none').
+        attr('stroke-width', '1') ).
       on('mouseup', (event) => {
         minimized = !minimized;
         updateWindowState();
       });
 
     var $normalSymbol = createSVGElement('g').
-      append(createSVGElement('rect').attr({
+      append(createSVGElement('rect').
+      attr('class', 'window-frame-button').
+      attr({
           x : btnSymGap + 2, y : btnSymGap,
           width: btnSize - btnSymGap * 2 - 2,
-          height: btnSize - btnSymGap * 2 - 2,
-          fill: btnFill, stroke: btnStroke, 'stroke-width' : '1'}) ).
-      append(createSVGElement('rect').attr({
+          height: btnSize - btnSymGap * 2 - 2, 'stroke-width' : '1'}) ).
+      append(createSVGElement('rect').
+      attr('class', 'window-frame-button').
+      attr({
           x : btnSymGap, y : btnSymGap + 2,
           width: btnSize - btnSymGap * 2 - 2,
           height: btnSize - btnSymGap * 2 - 2,
-          fill: btnFill, stroke: btnStroke, 'stroke-width' : '1'}) );
+          'stroke-width' : '1'}) );
 
     var $maximumSymbol = createSVGElement('g').
-      append(createSVGElement('rect').attr({
+      append(createSVGElement('rect').
+      attr('class', 'window-frame-button').css('fill', 'none'). 
+      attr({
           x : btnSymGap, y : btnSymGap,
           width: btnSize - btnSymGap * 2, height: btnSize - btnSymGap * 2,
-          fill: 'none', stroke: btnStroke, 'stroke-width' : '1'}) );
+          'stroke-width' : '1'}) );
 
     var $maximizeButton = crtBtn().
       append($normalSymbol).append($maximumSymbol).
@@ -227,7 +232,8 @@ namespace spa.ui {
           l(btnSize - btnSymGap, btnSize - btnSymGap).
           m(btnSymGap, btnSize - btnSymGap).
           l(btnSize - btnSymGap, btnSymGap).build().
-        attr({ fill: 'none', stroke: btnStroke, 'stroke-width' : '2'}) ).
+        attr('class', 'window-frame-button').css('fill', 'none').
+        attr({ 'stroke-width' : '2' }) ).
       on('mouseup', (event) => {
         $win.trigger(WindowEvent.DISPOSE_WINDOW);
       });
@@ -308,8 +314,8 @@ namespace spa.ui {
         $rect = $('<div></div>').css('position', 'absolute').
           css('left', '0px').css('top', '0px').
           css('right', '0px').css('bottom', '0px').
-//          css('background-color', '#000000').css('opacity', 0.2).
-          css('z-index', 10000). // TODO pending.
+          //css('background-color', '#000000').css('opacity', 0.2).
+          css('z-index', 100).
           css('cursor', $(event.currentTarget).css('cursor') );
         $('BODY').append($rect);
         var off = $win.offset();
