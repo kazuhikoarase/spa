@@ -291,8 +291,15 @@ namespace spa.ui {
 
     var resize_mouseDownHandler :
           (event : JQueryEventObject) => void = function() {
+
       var kind : string = null;
       var $rect : JQuery = null;
+
+      var x : number = null;
+      var y : number = null;
+      var w : number = null;
+      var h : number = null;
+
       return createDragHandler( (event) => {
         if (windowState == WindowState.MAXIMIZED) {
           return null;
@@ -307,14 +314,43 @@ namespace spa.ui {
           css('z-index', 10000). // ja, pending.
           css('cursor', $(event.currentTarget).css('cursor') );
         $('BODY').append($rect);
-        return {
-          x : event.pageX - $win.width(),
-          y : event.pageY - $win.height() };
+        var off = $win.offset();
+        x = off.left;
+        y = off.top;
+        w = $win.width();
+        h = $win.height();
+        return { x : event.pageX, y : event.pageY };
       }, (event, dragPoint) => {
-        console.log(kind);
-        var w = Math.max(100, event.pageX - dragPoint.x);
-        var h = Math.max(100, event.pageY - dragPoint.y);
-        $win.css('width', w + 'px').css('height', h + 'px');
+
+        var tbl = resizeTbl[kind];
+        var dx = event.pageX - dragPoint.x;
+        var dy = event.pageY - dragPoint.y;
+
+        var newX = x;
+        var newY = y;
+        var newW = w;
+        var newH = h;
+
+        if (tbl.x == -1) {
+          newX += dx;
+          newW -= dx;
+        }
+        if (tbl.y == -1) {
+          newY += dy;
+          newH -= dy;
+        }
+        if (tbl.x == 1) {
+          newW += dx;
+        }
+        if (tbl.y == 1) {
+          newH += dy;
+        }
+
+        //TODO adjust
+        $win.offset({ left : newX, top : newY });
+        $win.css('width', Math.max(100, newW) + 'px');
+        $win.css('height', Math.max(100, newH) + 'px');
+
       }, (event) => {
         $rect.remove();
       });
