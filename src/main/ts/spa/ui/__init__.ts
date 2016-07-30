@@ -8,18 +8,6 @@ namespace spa.ui {
       version: '1.1', width: w, height: h,
       viewBox: '0 0 ' + w + ' ' + h });
 
-  var createMaximizeButton = () => {
-    var $btn = createSVG(12, 12).css('float', 'right').
-      append(createSVGElement('rect').attr({
-          x : 0, y : 0, width: 12, height: 12,
-          fill: '#999999', stroke: 'none'}) ).append(
-      createSVGElement('path').attr({ d: 'M 2 2 L 10 10 M 2 10 L 10 2',
-        fill: 'none', stroke: '#333333', 'stroke-width' : '2'}) ).
-      on('mouseover', (event) => { $btn.css('opacity', '0.7'); } ).
-      on('mouseout', (event) => { $btn.css('opacity', ''); } );
-    return $btn;
-  };
-
   var windowListKey = '__spa_window_list__';
 
   var getWindowList = (ctx : WindowContext) => {
