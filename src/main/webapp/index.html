@@ -12,12 +12,13 @@ $(function() {
   $(window).on('resize', function(event) {
     $('#content').trigger('contentResize');
   });
+
   // append on body.
   spa.view.loadView('/app/TestView', function($ui) {
     $('#content').append($ui);
   });
 
-  // open as sub window.
+  // open as inner window.
   spa.view.loadView('/app/TestView', function($ui) {
     spa.ui.showWindow({
       $parent : $('#content'),
@@ -32,6 +33,6 @@ $(function() {
     </script>
   </head>
   <body>
-  <div id="content"></div>
+    <div id="content"></div>
   </body>
 </html>

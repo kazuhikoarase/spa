@@ -3,6 +3,7 @@ BODY {
   margin: 0px;
   padding: 0px;
   overflow: hidden;
+  background-color: #999999;
 }
 
 * {
@@ -26,7 +27,7 @@ BODY {
 
 .window-frame-resize-bar {
   background-color: #ffff00;
-	}
+}
 
 .window-frame-resize-corner {
   background-color: #ff0066;
