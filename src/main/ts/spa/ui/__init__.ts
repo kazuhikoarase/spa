@@ -296,13 +296,13 @@ namespace spa.ui {
     var resize_mouseDownHandler :
           (event : JQueryEventObject) => void = function() {
 
+      var maxWidth = 100;
+      var maxHeight = 100;
+
       var kind : string = null;
       var $rect : JQuery = null;
 
-      var x : number = null;
-      var y : number = null;
-      var w : number = null;
-      var h : number = null;
+      var org  = { left : 0, top : 0, width : 0, height : 0 };
 
       return createDragHandler( (event) => {
         if (windowState == WindowState.MAXIMIZED) {
@@ -319,10 +319,8 @@ namespace spa.ui {
           css('cursor', $(event.currentTarget).css('cursor') );
         $('BODY').append($rect);
         var off = $win.offset();
-        x = off.left;
-        y = off.top;
-        w = $win.width();
-        h = $win.height();
+        org = { left : off.left, top : off.top,
+          width : $win.width(), height : $win.height() };
         return { x : event.pageX, y : event.pageY };
       }, (event, dragPoint) => {
 
@@ -330,30 +328,34 @@ namespace spa.ui {
         var dx = event.pageX - dragPoint.x;
         var dy = event.pageY - dragPoint.y;
 
-        var newX = x;
-        var newY = y;
-        var newW = w;
-        var newH = h;
+        var newLeft = org.left;
+        var newTop = org.top;
+        var newWidth = org.width;
+        var newHeight = org.height;
 
         if (tbl.x == -1) {
-          newX += dx;
-          newW -= dx;
+          newLeft += dx;
+          newWidth -= dx;
         }
         if (tbl.y == -1) {
-          newY += dy;
-          newH -= dy;
+          newTop += dy;
+          newHeight -= dy;
         }
         if (tbl.x == 1) {
-          newW += dx;
+          newWidth += dx;
         }
         if (tbl.y == 1) {
-          newH += dy;
+          newHeight += dy;
         }
 
-        //TODO adjust
-        $win.offset({ left : newX, top : newY });
-        $win.css('width', Math.max(100, newW) + 'px');
-        $win.css('height', Math.max(100, newH) + 'px');
+        newWidth = Math.max(newWidth, 100);
+        newHeight = Math.max(newHeight, maxHeight);
+        newLeft = Math.min(newLeft, org.left + org.width - maxWidth);
+        newTop = Math.min(newTop, org.top + org.height - maxHeight);
+
+        $win.offset({ left : newLeft, top : newTop });
+        $win.css('width', newWidth + 'px');
+        $win.css('height', newHeight + 'px');
 
       }, (event) => {
         $rect.remove();
@@ -385,23 +387,23 @@ namespace spa.ui {
       css('height', frameCornerSize).css('left', '0px').
       css('right', '0px').css('cursor', 'ns-resize');
 
-    var $resizeCorners = {
-      lt : creCorner('lt').css('left', '0px').css('top', '0px').
+    var $resizeCorners = [
+      creCorner('lt').css('left', '0px').css('top', '0px').
         css('cursor', 'nwse-resize'),
-      lb : creCorner('lb').css('left', '0px').css('bottom', '0px').
+      creCorner('lb').css('left', '0px').css('bottom', '0px').
         css('cursor', 'nesw-resize'),
-      rt : creCorner('rt').css('right', '0px').css('top', '0px').
+      creCorner('rt').css('right', '0px').css('top', '0px').
         css('cursor', 'nesw-resize'),
-      rb : creCorner('rb').css('right', '0px').css('bottom', '0px').
+      creCorner('rb').css('right', '0px').css('bottom', '0px').
         css('cursor', 'nwse-resize')
-    };
+    ];
 
-    var $resizeBars = {
-      l : creVBar('l').css('left', '0px'),
-      r : creVBar('r').css('right', '0px'),
-      t : creHBar('t').css('top', '0px'),
-      b : creHBar('b').css('bottom', '0px')
-    };
+    var $resizeBars = [
+      creVBar('l').css('left', '0px'),
+      creVBar('r').css('right', '0px'),
+      creHBar('t').css('top', '0px'),
+      creHBar('b').css('bottom', '0px')
+    ];
 
     var $content = $('<div></div>').css('position', 'absolute').
       addClass('window-content').
@@ -423,10 +425,10 @@ namespace spa.ui {
         ctx.$parent.off('contentResize', parentResizeHandler);
       });
 
-    $.each($resizeBars, (id, $ui) => {
+    $.each($resizeBars, (i, $ui) => {
       $win.append($ui);
     });
-    $.each($resizeCorners, (id, $ui) => {
+    $.each($resizeCorners, (i, $ui) => {
       $win.append($ui);
     });
     $win.append($content);
