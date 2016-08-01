@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="Utf-8"?>
+<cls:Class
+  xmlns:cls="urn:Class"
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="urn:Class ClassDef.xsd"
+  comment="Test"
+  >
+
+  <cls:Property name="a" type="string" comment="param a"/>
+  <cls:Property name="b" type="string" comment="param b"/>
+  <cls:Property name="ope" type="string" comment="operator"/>
+  <cls:Property name="res" type="string" comment="result"/>
+
+</cls:Class>
+

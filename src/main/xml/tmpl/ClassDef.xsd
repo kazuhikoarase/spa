@@ -1,0 +1,81 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<schema targetNamespace="urn:Class" xmlns:cls="urn:Class"
+  xmlns="http://www.w3.org/2001/XMLSchema"
+  elementFormDefault="qualified" attributeFormDefault="unqualified">
+
+  <element name="Class" type="cls:ClassType"></element>
+
+  <complexType name="ClassType">
+    <sequence minOccurs="0" maxOccurs="unbounded">
+      <element name="Struct" type="cls:StructType"
+        maxOccurs="unbounded" minOccurs="0">
+      </element>
+      <element name="Property" type="cls:PropertyType"
+        minOccurs="0" maxOccurs="unbounded">
+      </element>
+      <element name="Script" type="cls:ScriptType" minOccurs="0" maxOccurs="unbounded"></element>
+    </sequence>
+    <attribute name="comment" type="string" use="required"></attribute>
+    <attribute name="extends" type="string" use="optional"></attribute>
+  </complexType>
+
+  <complexType name="StructType">
+    <sequence minOccurs="0" maxOccurs="unbounded">
+      <element name="Struct" type="cls:StructType" minOccurs="0"
+        maxOccurs="unbounded">
+      </element>
+      <element name="Property" type="cls:PropertyType"
+        minOccurs="0" maxOccurs="unbounded">
+      </element>
+    </sequence>
+    <attribute name="name" type="string" use="required"></attribute>
+    <attribute name="comment" type="string" use="required"></attribute>
+    <attribute name="collectionType" type="cls:CollectionType" use="optional"></attribute>
+  </complexType>
+
+  <complexType name="PropertyType">
+    <attribute name="name" type="string" use="required"></attribute>
+    <attribute name="comment" type="string" use="required"></attribute>
+    <attribute name="type" type="cls:DataType" use="required"></attribute>
+      <attribute name="customType" type="string" use="optional"></attribute>
+      <attribute name="collectionType" type="cls:CollectionType"
+      use="optional">
+    </attribute>
+  </complexType>
+
+  <simpleType name="CollectionType">
+    <restriction base="string">
+      <enumeration value="list"></enumeration>
+      <enumeration value="array"></enumeration>
+    </restriction>
+  </simpleType>
+
+  <simpleType name="DataType">
+    <restriction base="string">
+      <!-- 
+        <enumeration value="object"></enumeration>
+      -->
+      <enumeration value="string"></enumeration>
+      <!-- 
+        <enumeration value="number"></enumeration>
+      -->
+      <enumeration value="int"></enumeration>
+        <enumeration value="boolean"></enumeration>
+      <!-- 
+        <enumeration value="date"></enumeration>
+      -->
+      <enumeration value="date"></enumeration>
+      <enumeration value="decimal"></enumeration>
+      <enumeration value="custom"></enumeration>
+    </restriction>
+  </simpleType>
+
+  <complexType name="ScriptType">
+    <simpleContent>
+      <extension base="string">
+        <attribute name="lang" type="string" use="required"></attribute>
+      </extension>
+    </simpleContent>
+  </complexType>
+
+</schema>

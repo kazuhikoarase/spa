@@ -14,12 +14,12 @@ $(function() {
   });
 
   // append on body.
-  spa.view.loadView('/app/view/TestView', function($ui) {
+  spa.view.loadView('/myapp/view/TestView', function($ui) {
     $('#content').append($ui);
   });
 
   // open as inner window.
-  spa.view.loadView('/app/view/TestView', function($ui) {
+  spa.view.loadView('/myapp/view/TestView', function($ui) {
     spa.ui.showWindow({
       $parent : $('#content'),
       $content : $ui,

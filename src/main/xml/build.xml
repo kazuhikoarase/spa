@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="Utf-8" ?>
+<project default="all" basedir=".">
+
+  <property file="build.properties"/>
+
+  <property name="project.dir" location="../../../"/>
+  <property name="dest.dir.java" location="${project.dir}/src/main/generated/java"/>
+  <property name="dest.dir.ts" location="${project.dir}/src/main/generated/ts"/>
+
+  <property name="tmpl.dir" location="tmpl"/>
+
+  <!--
+  <target name="all" depends="Constants,Message,ActionForm,ValueObject,DAO"/>
+  -->
+  <target name="all" depends="Model" />
+	
+  <target name="Model">
+
+    <ant antfile="${tmpl.dir}/Class_build.xml" inheritall="false">
+      <property name="src.dir" location="."/>
+      <property name="dst.dir" location="${dest.dir.ts}"/>
+      <property name="xslt.includes" value="**/model/*.xml"/>
+      <property name="xslt.includes" value="${package-path.prefix}/**/model/*.xml"/>
+      <property name="xslt.style" value="Intf_ts.xsl"/>
+      <property name="xslt.extention" value=".d.ts"/>
+    </ant>
+
+  </target>
+
+  <target name="clean">
+
+    <delete>
+      <fileset dir="${dest.dir.ts}">
+        <include name="**/*.ts"/>
+      </fileset>
+    </delete>
+
+  </target>
+
+</project>

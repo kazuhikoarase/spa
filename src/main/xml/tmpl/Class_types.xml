@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="Utf-8"?>
+<Types>
+
+  <Type name="int">
+    <TypeMapping lang="java" type="int" default="0"/>
+    <TypeMapping lang="ts" type="number" default="0"/>
+  </Type>
+
+  <Type name="boolean">
+    <TypeMapping lang="java" type="boolean" default="false"/>
+    <TypeMapping lang="ts" type="boolean" default="false"/>
+  </Type>
+
+  <Type name="object">
+    <TypeMapping lang="java" type="java.lang.Object" default="null"/>
+    <TypeMapping lang="ts" type="any" default="null"/>
+  </Type>
+
+  <Type name="string">
+    <TypeMapping lang="java" type="java.lang.String" default="&quot;&quot;"/>
+    <TypeMapping lang="ts" type="string" default="&quot;&quot;"/>
+  </Type>
+
+  <Type name="date">
+    <TypeMapping lang="java" type="java.util.Date" default="null"/>
+    <TypeMapping lang="ts" type="Date" default="null"/>
+  </Type>
+
+  <Type name="number">
+    <TypeMapping lang="java" type="double" default="Double.NaN"/>
+    <TypeMapping lang="ts" type="number" default="NaN"/>
+  </Type>
+
+  <Type name="decimal">
+    <TypeMapping lang="java" type="java.math.BigDecimal" default="null"/>
+    <TypeMapping lang="ts" type="String" default="&quot;&quot;"/>
+  </Type>
+
+</Types>

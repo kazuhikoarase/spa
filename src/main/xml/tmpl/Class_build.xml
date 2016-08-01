@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="Utf-8" ?>
+<project default="all" basedir=".">
+
+  <property name="src.dir" location="."/>
+  <property name="dst.dir" location="."/>
+  <property name="xslt.includes" value=""/>
+  <property name="xslt.style" value=""/>
+  <property name="xslt.extention" value=""/>
+
+  <property name="subbuild.extention" value=".subbuild"/>
+  
+  <target name="all" depends="prepare,build,clean"/>
+
+  <target name="prepare">
+    <xslt 
+          filedirparameter="srcdir"
+      filenameparameter="srcname"
+      style="Class_build.subbuild.xsl"
+      basedir="${src.dir}"
+      includes="${xslt.includes}" 
+      destdir="${dst.dir}"
+      extension="${subbuild.extention}">
+    </xslt>
+  </target>
+
+  <target name="build">
+    <subant target="" inheritall="false">
+      <property name="build.dir" location="${basedir}"/>
+      <property name="src.dir" location="${src.dir}"/>
+      <property name="dst.dir" location="${dst.dir}"/>
+      <property name="xslt.style" value="${xslt.style}"/>
+      <property name="xslt.extention" value="${xslt.extention}"/>
+      <fileset dir="${dst.dir}" includes="**/*${subbuild.extention}"/>
+    </subant>
+  </target>
+
+  <target name="clean">
+    <delete>
+      <fileset dir="${dst.dir}" includes="**/*${subbuild.extention}"/>
+    </delete>
+  </target>
+
+</project>

@@ -1,30 +1,20 @@
-namespace app.service {
-
-  declare type AsyncFunc<P,R> = spa.service.AsyncFunc<P,R>;
-
-  declare type TestViewModel = app.model.TestViewModel;
-
-  // at first, declare an interface.
-  export interface TestViewService {
-    init : AsyncFunc<{}, TestViewModel>;
-    exec : AsyncFunc<{ model : TestViewModel }, TestViewModel>;
-  }
+namespace myapp.service {
 
   // then, implement it.
-  var service : TestViewService = {
+  var service : TestService = {
 
-    init : function(params, rh) {
+    init : function(params, resultHandler) {
       // initial model
-      var model : TestViewModel = {
+      var model : TestModel = {
         a : '1',
         b : '2',
         ope : '',
         res : '?'
       };
-      rh(model);
+      resultHandler(model);
     },
 
-    exec : function(params, rh) {
+    exec : function(params, resultHandler) {
 
       var model = params.model;
 
@@ -38,7 +28,7 @@ namespace app.service {
       } else {
       }
 
-      rh(params.model);
+      resultHandler(params.model);
     }
   };
 
