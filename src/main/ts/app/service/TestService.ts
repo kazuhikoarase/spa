@@ -1,6 +1,8 @@
-namespace app {
+namespace app.service {
 
   declare type AsyncFunc<P,R> = spa.service.AsyncFunc<P,R>;
+
+  declare type TestViewModel = app.model.TestViewModel;
 
   // at first, declare an interface.
   export interface TestViewService {

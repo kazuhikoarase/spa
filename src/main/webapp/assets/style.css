@@ -6,7 +6,7 @@ BODY {
   background-color: #999999;
 }
 
-* {
+BODY,TH,TD,INPUT,TEXTAREA,SELECT {
   font-family: 'Meiryo UI', sans-serif;
   font-size: 10pt;
 }

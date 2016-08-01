@@ -1,4 +1,4 @@
-declare namespace app {
+declare namespace app.model {
 
   interface TestViewModel {
     /**

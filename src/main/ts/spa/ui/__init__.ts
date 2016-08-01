@@ -43,15 +43,18 @@ namespace spa.ui {
 
   var crtBtn = () => createSVG(btnSize, btnSize).
       css('float', 'right').css('margin-left', '2px').
-      append(createSVGElement('rect').attr('class', 'window-frame-button').
-      css('stroke', 'none').
-      attr({ x: 0, y: 0, width: btnSize, height: btnSize}) ).
-      on('mouseover', function(event) { $(this).css('opacity', '0.7'); } ).
-      on('mouseout', function(event) { $(this).css('opacity', ''); } ).
-      on('mousedown', function(event) {
-        event.preventDefault();
-        event.stopPropagation();
-      });
+        append(createSVGElement('rect').
+        attr('class', 'window-frame-button').
+        css('stroke', 'none').
+        attr({ x: 0, y: 0, width: btnSize, height: btnSize}) ).
+        on('mouseover', function(event) {
+          $(this).css('opacity', '0.7');
+        } ).on('mouseout', function(event) {
+          $(this).css('opacity', '');
+        } ).on('mousedown', function(event) {
+          event.preventDefault();
+          event.stopPropagation();
+        });
 
   var path = () => {
     var d = '';
@@ -433,9 +436,25 @@ namespace spa.ui {
     });
     $win.append($content);
 
+    $content.on('testEvent', (event) => {
+      console.log('#1,' +
+        event.isDefaultPrevented() + ',phase:' + event.eventPhase)
+    });
+    $content.on('testEvent', (event) => {
+      console.log('#2,' +
+        event.isDefaultPrevented() + ',phase:' + event.eventPhase)
+      event.preventDefault();
+    });
+    $content.on('testEvent', (event) => {
+      console.log('#3,' +
+        event.isDefaultPrevented() + ',phase:' + event.eventPhase)
+    });
+    $content.trigger('testEvent');
+
     if (ctx.defaultWindowRect) {
       setWindowRect($win, ctx.defaultWindowRect);
     } else {
+      // TODO
       setWindowRect($win, { x : 0, y : 0, width : 300, height : 200 });
     }
 

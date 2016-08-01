@@ -1,4 +1,7 @@
-namespace app {
+namespace app.view {
+
+  declare type TestViewModel = app.model.TestViewModel;
+  declare type TestViewService = app.service.TestViewService;
 
   var newInstance : spa.view.ViewFactory<TestViewModel, TestViewService> =
       function(ctx) {
