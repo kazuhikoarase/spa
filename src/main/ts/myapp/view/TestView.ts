@@ -1,11 +1,10 @@
 namespace myapp.view {
 
-  declare type TestViewModel = myapp.model.TestModel;
-  declare type TestViewService = myapp.service.TestService;
+  declare type TestModel = myapp.model.TestModel;
+  declare type TestService = myapp.service.TestService;
 
-  var newInstance : spa.view.ViewFactory<
-    TestViewModel, TestViewService
-  > = function(ctx) {
+  var newInstance : spa.view.ViewFactory<TestModel, TestService> =
+      function(ctx) {
 
     // get the service for this view.
     var service = ctx.getService();

@@ -19,7 +19,7 @@
 <xsl:template match="cls:Class">
 <xsl:variable name="extends" select="@extends"/>
 
-<xsl:text/>// 自動生成されたファイルです。 編集しないでください。*
+<xsl:text/>// 自動生成されたファイルです。 編集しないでください。
 
 declare namespace <xsl:value-of select="$packageName"/> {
 
