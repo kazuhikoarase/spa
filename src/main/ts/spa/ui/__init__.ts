@@ -162,7 +162,14 @@ namespace spa.ui {
       var frameBorderWidth = windowState == WindowState.NORMAL? '4px' : '0px';
       $content.
         css('left', frameBorderWidth).css('top', frameBorderWidth).
-        css('right', frameBorderWidth).css('bottom', frameBorderWidth)
+        css('right', frameBorderWidth).css('bottom', frameBorderWidth);
+      updateContentSize();
+    };
+
+    var updateContentSize = () => {
+      ctx.$content.
+        outerWidth($content.innerWidth() ).
+        outerHeight($content.innerHeight() - $titlebar.outerHeight() );
     };
 
     var storeRect = () => {
@@ -359,6 +366,8 @@ namespace spa.ui {
         $win.offset({ left : newLeft, top : newTop });
         $win.css('width', newWidth + 'px');
         $win.css('height', newHeight + 'px');
+
+        updateContentSize();
 
       }, (event) => {
         $rect.remove();
