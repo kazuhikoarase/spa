@@ -1,0 +1,11 @@
+<project default="compile">
+  <property environment="env" />
+  <property name="node.path" location="${env.APPDATA}/npm"/>
+  <property name="tsc" location="${node.path}/tsc.cmd" />
+  <target name="compile">
+    <exec executable="${tsc}" failonerror="true"></exec>
+  </target>
+  <target name="clean">
+    <delete dir="../webapp/WEB-INF/js"/>
+  </target>
+</project>
