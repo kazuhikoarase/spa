@@ -5,7 +5,8 @@
 
   <property name="project.dir" location="../../../"/>
   <property name="dest.dir.java" location="${project.dir}/src/main/generated/java"/>
-  <property name="dest.dir.ts" location="${project.dir}/src/main/generated/ts"/>
+  <property name="dest.dir.ts" location="${project.dir}/src/main/ts"/>
+  <property name="dest.dir.ts-gen" location="${project.dir}/src/main/generated/ts"/>
 
   <property name="tmpl.dir" location="tmpl"/>
 
@@ -18,12 +19,17 @@
 
     <ant antfile="${tmpl.dir}/Class_build.xml" inheritall="false">
       <property name="src.dir" location="."/>
-      <property name="dst.dir" location="${dest.dir.ts}"/>
+      <property name="dst.dir" location="${dest.dir.ts-gen}"/>
       <property name="xslt.includes" value="**/model/*.xml"/>
       <property name="xslt.includes" value="${package-path.prefix}/**/model/*.xml"/>
       <property name="xslt.style" value="Intf_ts.xsl"/>
       <property name="xslt.extention" value=".d.ts"/>
     </ant>
+    <concat destfile="${dest.dir.ts}/d/model.d.ts">
+      <fileset dir="${dest.dir.ts-gen}">
+        <include name="**/*" />
+      </fileset>
+    </concat>
 
   </target>
 

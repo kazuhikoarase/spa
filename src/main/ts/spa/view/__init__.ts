@@ -13,19 +13,21 @@ namespace spa.view {
   };
 
   export var loadView = (viewName : string,
-        onload : ($ui : JQuery) => void) => {
+        onload : ($ui : JQuery, resources? : string[]) => void) => {
 
     if (!viewName.match(/^(\/.+)\/view\/([^\/]+)View$/) ) {
       throw 'bad viewName:' + viewName;
     }
+    var serviceName = RegExp.$1 + '/service/' + RegExp.$2 + 'Service';
 
-    var viewPrefix = RegExp.$1;
-    var viewBody = RegExp.$2;
     var urls : string[] = [
-      viewPrefix + '/view/' + viewBody + 'View.js',
-      viewPrefix + '/view/' + viewBody + 'View.html',
-      viewPrefix + '/service/' + viewBody + 'Service.js',
+      viewName + '.html',
+      viewName + '.js',
+      serviceName + '.js'
     ];
+
+    var resources : string[] = [];
+    $.each(urls, (i, url) => { resources.push(''); });
 
     var numLoaded = 0;
     var $template : JQuery = null;
@@ -36,6 +38,7 @@ namespace spa.view {
             url }).done( (data) => {
 
         numLoaded += 1;
+        resources[i] = data;
         if (url.match(/\.html$/) && data) {
           $template = $(data);
         }
@@ -46,8 +49,7 @@ namespace spa.view {
         // all files are loaded,
         var viewDef = viewDefs[viewName];
         var $view : JQuery = viewDef.newInstance({
-          getService : () => spa.service.getServiceDef(
-            viewPrefix + '/service/' + viewBody + 'Service').service,
+          getService : () => spa.service.getServiceDef(serviceName).service,
           getTemplate : () => $template,
           getModel : () => {
             viewDef.viewToModel($view, _model);
@@ -56,9 +58,9 @@ namespace spa.view {
           setModel : (model : any) => {
             _model = model;
             viewDef.modelToView(model, $view);
-          }
+          },
         });
-        onload($view);
+        onload($view, resources);
       });
     });
   };

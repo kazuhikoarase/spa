@@ -35,9 +35,13 @@ BODY,TH,TD,INPUT,TEXTAREA,SELECT {
 
 .window-title {
   color: #ffffff;
-  background-color: #000066;
+  background-color: #999999;
   font-weight: bold;
   padding: 4px;
+}
+
+.window-active .window-title {
+  background-color: #000066;
 }
 
 .window-content {

@@ -10,7 +10,9 @@
 
 $(function() {
   $(window).on('resize', function(event) {
-    $('#content').trigger('contentResize');
+    if ($(event.target).attr('id') != 'content') {
+      $('#content').trigger('resize');
+    }
   });
 
   // append on body.
@@ -19,6 +21,14 @@ $(function() {
   });
 
   // open as inner window.
+  spa.view.loadView('/myapp/view/TestView', function($ui) {
+    spa.ui.showWindow({
+      $parent : $('#content'),
+      $content : $ui,
+      title : 'Test',
+      showCloseButton : true
+    });
+  });
   spa.view.loadView('/myapp/view/TestView', function($ui) {
     spa.ui.showWindow({
       $parent : $('#content'),

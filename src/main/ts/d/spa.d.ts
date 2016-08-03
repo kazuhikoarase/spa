@@ -22,7 +22,8 @@ declare namespace spa.view {
 
   var defineView : <M,S>(viewDef : ViewDef<M,S>) => void;
 
-  var loadView : (name : string, onload : ($ui : JQuery) => void) => void;
+  var loadView : (name : string,
+    onload : ($ui : JQuery, resources? : string[]) => void) => void;
 }
 
 declare namespace spa.service {
@@ -47,8 +48,8 @@ declare namespace spa.service {
 declare module spa.ui {
 
   interface Rect {
-    x : number|string;
-    y : number|string;
+    x : number;
+    y : number;
     width : number;
     height : number;
   }
