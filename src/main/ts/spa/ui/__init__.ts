@@ -78,10 +78,10 @@ namespace spa.ui {
     return builder;
   };
 
-  var getWindowRect : ($win : JQuery) => Rect = ($win) => {
+  var getWindowRect = ($win : JQuery) => {
     var parentOff = $win.parent().offset();
     var off = $win.offset();
-    return {
+    return <Rect>{
       x : off.left - parentOff.left,
       y : off.top - parentOff.top,
       width : Math.ceil($win.innerWidth() ),
@@ -89,32 +89,29 @@ namespace spa.ui {
     };
   };
 
-  var setWindowRect : ($win : JQuery, rect : Rect) => JQuery = ($win, rect) => {
-    var left = typeof rect.x == 'number'? rect.x + 'px' : rect.x;
-    var top = typeof rect.y == 'number'? rect.y + 'px' : rect.y;
-    $win.css('left', left).
-      css('top', top).
+  var setWindowRect = ($win : JQuery, rect : Rect) => {
+    $win.css('left', rect.x + 'px').
+      css('top', rect.y + 'px').
       css('width', rect.width + 'px').
       css('height', rect.height + 'px');
     return $win;
   };
 
   var createDragHandler = (
-    mouseDown : (event : JQueryEventObject) => Point,
-    mouseMove : (event : JQueryEventObject, dragPoint : Point) => void,
+    mouseDown : (event : JQueryEventObject) => boolean,
+    mouseMove : (event : JQueryEventObject) => void,
     mouseUp? : (event : JQueryEventObject) => void
   ) => {
     var dragPoint : Point = null;
     var titlebar_mouseDownHandler = (event : JQueryEventObject) => {
-      dragPoint = mouseDown(event);
-      if (dragPoint == null) {
+      if (!mouseDown(event) ) {
         return;
       }
       $(document).on('mousemove', mouseMoveHandler).
         on('mouseup', mouseUpHandler);
     };
     var mouseMoveHandler = (event : JQueryEventObject) => {
-      mouseMove(event, dragPoint);
+      mouseMove(event);
     };
     var mouseUpHandler = (event : JQueryEventObject) => {
       if (mouseUp) {
@@ -301,18 +298,23 @@ namespace spa.ui {
       }
     };
 
-    var titlebar_mouseDownHandler : (event : JQueryEventObject) => void =
-        createDragHandler( (event) => {
+    var titlebar_mouseDownHandler = function() {
+
+      var dragPoint : Point;
+
+      return createDragHandler( (event) => {
           if (windowState == WindowState.MAXIMIZED) {
-            return null;
+            return false;
           }
           event.preventDefault();
           var parentOff = ctx.$parent.offset();
           var off = $win.offset();
-          return { 
-            x : event.pageX - off.left + parentOff.left,
-            y : event.pageY - off.top + parentOff.top };
-        }, (event, dragPoint) => {
+          dragPoint = {
+            x : event.pageX - off.left,
+            y : event.pageY - off.top };
+
+          return true;
+        }, (event) => {
           var x = event.pageX - dragPoint.x;
           var y = event.pageY - dragPoint.y;
           /*
@@ -323,8 +325,10 @@ namespace spa.ui {
             maxRect.y + maxRect.height - minHeight) );
           */
           //TODO
-          $win.css('left', x + 'px').css('top', y + 'px');
+//          $win.css('left', x + 'px').css('top', y + 'px');
+          $win.offset({ left : x, top : y });
         });
+    }();
 
     var $titlebar = $('<div></div>').addClass('window-title').
         css('cursor', 'default').text(ctx.title).
@@ -337,82 +341,83 @@ namespace spa.ui {
           $maximizeButton.trigger('mouseup');
         });
 
-    var resize_mouseDownHandler :
-          (event : JQueryEventObject) => void = function() {
+    var resize_mouseDownHandler = function() {
 
       var kind : string = null;
       var $rect : JQuery = null;
-      var org  = { x : 0, y : 0, width : 0, height : 0 };
+      var orgRect :Rect = null;
+      var dragPoint : Point = null;
 
       return createDragHandler( (event) => {
-        if (windowState == WindowState.MAXIMIZED) {
-          return null;
-        }
-        event.preventDefault();
-        updateWindowList(false);
-        kind = $(event.currentTarget).attr('resize-kind');
-        $rect = $('<div></div>').css('position', 'absolute').
-          css('left', '0px').css('top', '0px').
-          css('right', '0px').css('bottom', '0px').
-          //css('background-color', '#000000').css('opacity', 0.2).
-          css('z-index', 100).
-          css('cursor', $(event.currentTarget).css('cursor') );
-        $('BODY').append($rect);
-        /*
-        var off = $win.offset();
-        org = { left : off.left, top : off.top,
-          width : $win.width(), height : $win.height() };
-        */
-        org = getWindowRect($win);
-        return { x : event.pageX, y : event.pageY };
-      }, (event, dragPoint) => {
+          if (windowState == WindowState.MAXIMIZED) {
+            return false;
+          }
+          event.preventDefault();
+          updateWindowList(false);
+          kind = $(event.currentTarget).attr('resize-kind');
+          $rect = $('<div></div>').css('position', 'absolute').
+            css('left', '0px').css('top', '0px').
+            css('right', '0px').css('bottom', '0px').
+            //css('background-color', '#000000').css('opacity', 0.2).
+            css('z-index', 100).
+            css('cursor', $(event.currentTarget).css('cursor') );
+          $('BODY').append($rect);
+          /*
+          var off = $win.offset();
+          org = { left : off.left, top : off.top,
+            width : $win.width(), height : $win.height() };
+          */
+          orgRect = getWindowRect($win);
+          dragPoint = { x : event.pageX, y : event.pageY };
+          return true;
+        }, (event) => {
 
-        var tbl = resizeTbl[kind];
-        var dx = event.pageX - dragPoint.x;
-        var dy = event.pageY - dragPoint.y;
+          var tbl = resizeTbl[kind];
+          var dx = event.pageX - dragPoint.x;
+          var dy = event.pageY - dragPoint.y;
 
-        var newRect = { x : org.x, y : org.y,
-          width : org.width, height : org.height };
+          var newRect = { x : orgRect.x, y : orgRect.y,
+            width : orgRect.width, height : orgRect.height };
 
-        if (tbl.x == -1) {
-          newRect.x += dx;
-        }
-        if (tbl.y == -1) {
-          newRect.y += dy;
-        }
+          if (tbl.x == -1) {
+            newRect.x += dx;
+          }
+          if (tbl.y == -1) {
+            newRect.y += dy;
+          }
 
-        var maxRect = getMaximumRect();
-        newRect.x = Math.max(maxRect.x,
-          Math.min(newRect.x, org.x + org.width - minWidth) );
-        newRect.y = Math.max(maxRect.y,
-          Math.min(newRect.y, org.y + org.height - minHeight) );
+          var maxRect = getMaximumRect();
+          newRect.x = Math.max(maxRect.x,
+            Math.min(newRect.x, orgRect.x + orgRect.width - minWidth) );
+          newRect.y = Math.max(maxRect.y,
+            Math.min(newRect.y, orgRect.y + orgRect.height - minHeight) );
 
-        if (tbl.x == -1) {
-          newRect.width -= newRect.x - org.x;
-        }
-        if (tbl.y == -1) {
-          newRect.height -= newRect.y - org.y;
-        }
+          if (tbl.x == -1) {
+            newRect.width -= newRect.x - orgRect.x;
+          }
+          if (tbl.y == -1) {
+            newRect.height -= newRect.y - orgRect.y;
+          }
 
-        if (tbl.x == 1) {
-          newRect.width += dx;
-        }
-        if (tbl.y == 1) {
-          newRect.height += dy;
-        }
+          if (tbl.x == 1) {
+            newRect.width += dx;
+          }
+          if (tbl.y == 1) {
+            newRect.height += dy;
+          }
 
-        newRect.width = Math.max(minWidth,
-          Math.min(newRect.width, maxRect.width) );
-        newRect.height = Math.max(minHeight,
-          Math.min(newRect.height, maxRect.height) );
+          newRect.width = Math.max(minWidth,
+            Math.min(newRect.width, maxRect.width) );
+          newRect.height = Math.max(minHeight,
+            Math.min(newRect.height, maxRect.height) );
 
-        setWindowRect($win, newRect);
+          setWindowRect($win, newRect);
 
-        updateContentSize();
+          updateContentSize();
 
-      }, (event) => {
-        $rect.remove();
-      });
+        }, (event) => {
+          $rect.remove();
+        });
     }();
 
     var frameCornerSize = '8px';
@@ -481,21 +486,6 @@ namespace spa.ui {
     });
     $win.append($content);
 
-    $content.on('testEvent', (event) => {
-      console.log('#1,' +
-        event.isDefaultPrevented() + ',phase:' + event.eventPhase)
-    });
-    $content.on('testEvent', (event) => {
-      console.log('#2,' +
-        event.isDefaultPrevented() + ',phase:' + event.eventPhase)
-      event.preventDefault();
-    });
-    $content.on('testEvent', (event) => {
-      console.log('#3,' +
-        event.isDefaultPrevented() + ',phase:' + event.eventPhase)
-    });
-    $content.trigger('testEvent');
-
     if (ctx.defaultWindowRect) {
       setWindowRect($win, ctx.defaultWindowRect);
     } else {
@@ -503,7 +493,8 @@ namespace spa.ui {
       setWindowRect($win, { x : 0, y : 0, width : 300, height : 200 });
     }
 
-    ctx.$parent.append($win).on('resize', parent_resizeHandler);
+    ctx.$parent.append($win)
+    ctx.$parent.on('resize', parent_resizeHandler);
 
     updateWindowState();
 
