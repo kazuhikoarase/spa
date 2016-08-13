@@ -178,7 +178,8 @@ namespace spa.ui {
     };
 
     var defaultGetMaximumRect : () => Rect = () => {
-      return { x : 0, y : 0,
+      var off = ctx.$parent.offset();
+      return { x : off.left, y : off.top,
         width : ctx.$parent.width(),
         height : ctx.$parent.height() };
     };
