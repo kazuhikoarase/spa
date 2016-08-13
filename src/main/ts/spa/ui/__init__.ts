@@ -35,11 +35,6 @@ namespace spa.ui {
     WINDOW_CLOSE : 'windowClose'
   };
 
-  interface Point {
-    x : number;
-    y : number;
-  }
-
   var btnSize = 15;
   var btnSymGap = 2.5;
 

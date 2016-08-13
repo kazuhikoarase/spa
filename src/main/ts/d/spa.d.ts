@@ -47,9 +47,12 @@ declare namespace spa.service {
 
 declare module spa.ui {
 
-  interface Rect {
+  interface Point {
     x : number;
     y : number;
+  }
+
+  interface Rect extends Point {
     width : number;
     height : number;
   }
