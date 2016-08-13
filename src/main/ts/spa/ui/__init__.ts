@@ -84,16 +84,14 @@ namespace spa.ui {
     return <Rect>{
       x : off.left - parentOff.left,
       y : off.top - parentOff.top,
-      width : Math.ceil($win.innerWidth() ),
-      height : Math.ceil($win.innerHeight() )
+      width : Math.ceil($win.width() ),
+      height : Math.ceil($win.height() )
     };
   };
 
   var setWindowRect = ($win : JQuery, rect : Rect) => {
-    $win.css('left', rect.x + 'px').
-      css('top', rect.y + 'px').
-      css('width', rect.width + 'px').
-      css('height', rect.height + 'px');
+    $win.css('left', rect.x + 'px').css('top', rect.y + 'px').
+      width(rect.width).height(rect.height);
     return $win;
   };
 
